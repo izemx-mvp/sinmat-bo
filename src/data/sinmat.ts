@@ -48,7 +48,7 @@ export interface Prospect {
   opportuniteId?: string | undefined;
   clientId?: string | undefined;
   ia?: {
-    besoin: TypeActivite | undefined;
+    besoin: TypeActivite;
     produit: string;
     quantite: number;
     duree: string;

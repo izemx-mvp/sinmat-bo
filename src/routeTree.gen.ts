@@ -10,11 +10,48 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CampagnesIndexRouteImport } from './routes/campagnes.index'
+import { Route as CampagnesIdRouteImport } from './routes/campagnes.$id'
+import { Route as CampagnesNouvelleRouteImport } from './routes/campagnes.nouvelle'
+import { Route as ClientsIndexRouteImport } from './routes/clients.index'
+import { Route as ClientsIdRouteImport } from './routes/clients.$id'
+import { Route as OpportunitesIndexRouteImport } from './routes/opportunites.index'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
+import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampagnesIndexRoute = CampagnesIndexRouteImport.update({
+  id: '/campagnes/',
+  path: '/campagnes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampagnesIdRoute = CampagnesIdRouteImport.update({
+  id: '/campagnes/$id',
+  path: '/campagnes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampagnesNouvelleRoute = CampagnesNouvelleRouteImport.update({
+  id: '/campagnes/nouvelle',
+  path: '/campagnes/nouvelle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsIndexRoute = ClientsIndexRouteImport.update({
+  id: '/clients/',
+  path: '/clients/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsIdRoute = ClientsIdRouteImport.update({
+  id: '/clients/$id',
+  path: '/clients/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpportunitesIndexRoute = OpportunitesIndexRouteImport.update({
+  id: '/opportunites/',
+  path: '/opportunites/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProspectsIndexRoute = ProspectsIndexRouteImport.update({
@@ -22,30 +59,91 @@ const ProspectsIndexRoute = ProspectsIndexRouteImport.update({
   path: '/prospects/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProspectsIdRoute = ProspectsIdRouteImport.update({
+  id: '/prospects/$id',
+  path: '/prospects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/campagnes/$id': typeof CampagnesIdRoute
+  '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
+  '/clients/$id': typeof ClientsIdRoute
+  '/prospects/$id': typeof ProspectsIdRoute
+  '/campagnes/': typeof CampagnesIndexRoute
+  '/clients/': typeof ClientsIndexRoute
+  '/opportunites/': typeof OpportunitesIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/campagnes/$id': typeof CampagnesIdRoute
+  '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
+  '/clients/$id': typeof ClientsIdRoute
+  '/prospects/$id': typeof ProspectsIdRoute
+  '/campagnes': typeof CampagnesIndexRoute
+  '/clients': typeof ClientsIndexRoute
+  '/opportunites': typeof OpportunitesIndexRoute
   '/prospects': typeof ProspectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/campagnes/$id': typeof CampagnesIdRoute
+  '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
+  '/clients/$id': typeof ClientsIdRoute
+  '/prospects/$id': typeof ProspectsIdRoute
+  '/campagnes/': typeof CampagnesIndexRoute
+  '/clients/': typeof ClientsIndexRoute
+  '/opportunites/': typeof OpportunitesIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/prospects/'
+  fullPaths:
+    | '/'
+    | '/campagnes/$id'
+    | '/campagnes/nouvelle'
+    | '/clients/$id'
+    | '/prospects/$id'
+    | '/campagnes/'
+    | '/clients/'
+    | '/opportunites/'
+    | '/prospects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/prospects'
-  id: '__root__' | '/' | '/prospects/'
+  to:
+    | '/'
+    | '/campagnes/$id'
+    | '/campagnes/nouvelle'
+    | '/clients/$id'
+    | '/prospects/$id'
+    | '/campagnes'
+    | '/clients'
+    | '/opportunites'
+    | '/prospects'
+  id:
+    | '__root__'
+    | '/'
+    | '/campagnes/$id'
+    | '/campagnes/nouvelle'
+    | '/clients/$id'
+    | '/prospects/$id'
+    | '/campagnes/'
+    | '/clients/'
+    | '/opportunites/'
+    | '/prospects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CampagnesIdRoute: typeof CampagnesIdRoute
+  CampagnesNouvelleRoute: typeof CampagnesNouvelleRoute
+  ClientsIdRoute: typeof ClientsIdRoute
+  ProspectsIdRoute: typeof ProspectsIdRoute
+  CampagnesIndexRoute: typeof CampagnesIndexRoute
+  ClientsIndexRoute: typeof ClientsIndexRoute
+  OpportunitesIndexRoute: typeof OpportunitesIndexRoute
   ProspectsIndexRoute: typeof ProspectsIndexRoute
 }
 
@@ -58,6 +156,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campagnes/': {
+      id: '/campagnes/'
+      path: '/campagnes'
+      fullPath: '/campagnes/'
+      preLoaderRoute: typeof CampagnesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campagnes/$id': {
+      id: '/campagnes/$id'
+      path: '/campagnes/$id'
+      fullPath: '/campagnes/$id'
+      preLoaderRoute: typeof CampagnesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campagnes/nouvelle': {
+      id: '/campagnes/nouvelle'
+      path: '/campagnes/nouvelle'
+      fullPath: '/campagnes/nouvelle'
+      preLoaderRoute: typeof CampagnesNouvelleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients/': {
+      id: '/clients/'
+      path: '/clients'
+      fullPath: '/clients/'
+      preLoaderRoute: typeof ClientsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients/$id': {
+      id: '/clients/$id'
+      path: '/clients/$id'
+      fullPath: '/clients/$id'
+      preLoaderRoute: typeof ClientsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opportunites/': {
+      id: '/opportunites/'
+      path: '/opportunites'
+      fullPath: '/opportunites/'
+      preLoaderRoute: typeof OpportunitesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/prospects/': {
       id: '/prospects/'
       path: '/prospects'
@@ -65,11 +205,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProspectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prospects/$id': {
+      id: '/prospects/$id'
+      path: '/prospects/$id'
+      fullPath: '/prospects/$id'
+      preLoaderRoute: typeof ProspectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CampagnesIdRoute: CampagnesIdRoute,
+  CampagnesNouvelleRoute: CampagnesNouvelleRoute,
+  ClientsIdRoute: ClientsIdRoute,
+  ProspectsIdRoute: ProspectsIdRoute,
+  CampagnesIndexRoute: CampagnesIndexRoute,
+  ClientsIndexRoute: ClientsIndexRoute,
+  OpportunitesIndexRoute: OpportunitesIndexRoute,
   ProspectsIndexRoute: ProspectsIndexRoute,
 }
 export const routeTree = rootRouteImport
