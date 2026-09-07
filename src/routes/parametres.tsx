@@ -1,18 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Building2, CreditCard, Mail, Palette, Save, Shield } from "lucide-react";
+import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Panneau } from "@/components/app/ui-kit";
-
-const SECTIONS = [
-  { id: "societe", titre: "Société", description: "Informations légales et de contact", Icone: Building2 },
-  { id: "facturation", titre: "Facturation", description: "Paramètres de calcul et de paiement", Icone: CreditCard },
-  { id: "notifications", titre: "Notifications", description: "Canaux de communication", Icone: Mail },
-  { id: "securite", titre: "Sécurité", description: "Accès et authentification", Icone: Shield },
-  { id: "apparence", titre: "Apparence", description: "Thème et langue", Icone: Palette },
-];
 
 export const Route = createFileRoute("/parametres")({
   head: () => ({
@@ -49,7 +41,7 @@ function PageParametres() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <Panneau titre="Société" description="Informations légales et de contact" icone={<Building2 className="size-4 text-muted-foreground" />}>
+        <Panneau titre="Société" description="Informations légales et de contact">
           <div className="space-y-4">
             <div>
               <label className="text-[12.5px] font-medium text-muted-foreground">Raison sociale</label>
@@ -66,7 +58,7 @@ function PageParametres() {
           </div>
         </Panneau>
 
-        <Panneau titre="Facturation" description="Paramètres de calcul et de paiement" icone={<CreditCard className="size-4 text-muted-foreground" />}>
+        <Panneau titre="Facturation" description="Paramètres de calcul et de paiement">
           <div className="space-y-4">
             <div>
               <label className="text-[12.5px] font-medium text-muted-foreground">TVA par défaut (%)</label>
@@ -88,7 +80,7 @@ function PageParametres() {
           </div>
         </Panneau>
 
-        <Panneau titre="Notifications" description="Canaux de communication" icone={<Mail className="size-4 text-muted-foreground" />}>
+        <Panneau titre="Notifications" description="Canaux de communication">
           <div className="space-y-3">
             {["Nouveau prospect qualifié", "Devis accepté", "Paiement reçu", "Livraison planifiée"].map((label) => (
               <label key={label} className="flex items-center justify-between rounded-lg border border-border bg-surface-muted/30 p-3">
@@ -99,7 +91,7 @@ function PageParametres() {
           </div>
         </Panneau>
 
-        <Panneau titre="Sécurité" description="Accès et authentification" icone={<Shield className="size-4 text-muted-foreground" />}>
+        <Panneau titre="Sécurité" description="Accès et authentification">
           <div className="space-y-3">
             <label className="flex items-center justify-between rounded-lg border border-border bg-surface-muted/30 p-3">
               <span className="text-[13.5px] text-foreground">Authentification à deux facteurs</span>
@@ -112,7 +104,7 @@ function PageParametres() {
           </div>
         </Panneau>
 
-        <Panneau titre="Apparence" description="Thème et langue" icone={<Palette className="size-4 text-muted-foreground" />}>
+        <Panneau titre="Apparence" description="Thème et langue">
           <div className="space-y-4">
             <div>
               <label className="text-[12.5px] font-medium text-muted-foreground">Langue</label>

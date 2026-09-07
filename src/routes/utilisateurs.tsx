@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Search, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Cellule, Kpi, Ligne, Onglets, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
-import { useSinmat } from "@/data/store";
+import { utilisateurs } from "@/data/sinmat";
 
 export const Route = createFileRoute("/utilisateurs")({
   head: () => ({
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/utilisateurs")({
 const TABS = ["Tous", "Administrateur", "Direction", "Commercial", "Comptabilité", "Logistique"];
 
 function PageUtilisateurs() {
-  const { utilisateurs } = useSinmat();
   const [tab, setTab] = useState("Tous");
   const [q, setQ] = useState("");
 
@@ -31,7 +30,7 @@ function PageUtilisateurs() {
       if (tab === "Tous") return true;
       return u.role === tab;
     });
-  }, [utilisateurs, tab, q]);
+  }, [tab, q]);
 
   const compteurs = Object.fromEntries(TABS.map((t) => [t, t === "Tous" ? utilisateurs.length : utilisateurs.filter((u) => u.role === t).length]));
 
