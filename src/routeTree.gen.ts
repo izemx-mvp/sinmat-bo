@@ -15,6 +15,7 @@ import { Route as CampagnesIdRouteImport } from './routes/campagnes.$id'
 import { Route as CampagnesNouvelleRouteImport } from './routes/campagnes.nouvelle'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsIdRouteImport } from './routes/clients.$id'
+import { Route as OpportunitesIndexRouteImport } from './routes/opportunites.index'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
 
@@ -48,6 +49,11 @@ const ClientsIdRoute = ClientsIdRouteImport.update({
   path: '/clients/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpportunitesIndexRoute = OpportunitesIndexRouteImport.update({
+  id: '/opportunites/',
+  path: '/opportunites/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProspectsIndexRoute = ProspectsIndexRouteImport.update({
   id: '/prospects/',
   path: '/prospects/',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/prospects/$id': typeof ProspectsIdRoute
   '/campagnes/': typeof CampagnesIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/opportunites/': typeof OpportunitesIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/prospects/$id': typeof ProspectsIdRoute
   '/campagnes': typeof CampagnesIndexRoute
   '/clients': typeof ClientsIndexRoute
+  '/opportunites': typeof OpportunitesIndexRoute
   '/prospects': typeof ProspectsIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/prospects/$id': typeof ProspectsIdRoute
   '/campagnes/': typeof CampagnesIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/opportunites/': typeof OpportunitesIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/prospects/$id'
     | '/campagnes/'
     | '/clients/'
+    | '/opportunites/'
     | '/prospects/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/prospects/$id'
     | '/campagnes'
     | '/clients'
+    | '/opportunites'
     | '/prospects'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/prospects/$id'
     | '/campagnes/'
     | '/clients/'
+    | '/opportunites/'
     | '/prospects/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   ProspectsIdRoute: typeof ProspectsIdRoute
   CampagnesIndexRoute: typeof CampagnesIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
+  OpportunitesIndexRoute: typeof OpportunitesIndexRoute
   ProspectsIndexRoute: typeof ProspectsIndexRoute
 }
 
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/opportunites/': {
+      id: '/opportunites/'
+      path: '/opportunites'
+      fullPath: '/opportunites/'
+      preLoaderRoute: typeof OpportunitesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/prospects/': {
       id: '/prospects/'
       path: '/prospects'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProspectsIdRoute: ProspectsIdRoute,
   CampagnesIndexRoute: CampagnesIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
+  OpportunitesIndexRoute: OpportunitesIndexRoute,
   ProspectsIndexRoute: ProspectsIndexRoute,
 }
 export const routeTree = rootRouteImport
