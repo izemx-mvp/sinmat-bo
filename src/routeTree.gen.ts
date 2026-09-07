@@ -10,6 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ParametresRouteImport } from './routes/parametres'
+import { Route as RapportsRouteImport } from './routes/rapports'
+import { Route as UtilisateursRouteImport } from './routes/utilisateurs'
 import { Route as CampagnesIndexRouteImport } from './routes/campagnes.index'
 import { Route as CampagnesIdRouteImport } from './routes/campagnes.$id'
 import { Route as CampagnesNouvelleRouteImport } from './routes/campagnes.nouvelle'
@@ -41,6 +44,21 @@ import { Route as VentesIdRouteImport } from './routes/ventes.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParametresRoute = ParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RapportsRoute = RapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UtilisateursRoute = UtilisateursRouteImport.update({
+  id: '/utilisateurs',
+  path: '/utilisateurs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampagnesIndexRoute = CampagnesIndexRouteImport.update({
@@ -181,6 +199,9 @@ const VentesIdRoute = VentesIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/parametres': typeof ParametresRoute
+  '/rapports': typeof RapportsRoute
+  '/utilisateurs': typeof UtilisateursRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
   '/catalogue/$id': typeof CatalogueIdRoute
@@ -211,6 +232,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/parametres': typeof ParametresRoute
+  '/rapports': typeof RapportsRoute
+  '/utilisateurs': typeof UtilisateursRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
   '/catalogue/$id': typeof CatalogueIdRoute
@@ -242,6 +266,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/parametres': typeof ParametresRoute
+  '/rapports': typeof RapportsRoute
+  '/utilisateurs': typeof UtilisateursRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
   '/catalogue/$id': typeof CatalogueIdRoute
@@ -274,6 +301,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/parametres'
+    | '/rapports'
+    | '/utilisateurs'
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
     | '/catalogue/$id'
@@ -304,6 +334,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/parametres'
+    | '/rapports'
+    | '/utilisateurs'
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
     | '/catalogue/$id'
@@ -334,6 +367,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/parametres'
+    | '/rapports'
+    | '/utilisateurs'
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
     | '/catalogue/$id'
@@ -365,6 +401,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ParametresRoute: typeof ParametresRoute
+  RapportsRoute: typeof RapportsRoute
+  UtilisateursRoute: typeof UtilisateursRoute
   CampagnesIdRoute: typeof CampagnesIdRoute
   CampagnesNouvelleRoute: typeof CampagnesNouvelleRoute
   CatalogueIdRoute: typeof CatalogueIdRoute
@@ -401,6 +440,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parametres': {
+      id: '/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof ParametresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rapports': {
+      id: '/rapports'
+      path: '/rapports'
+      fullPath: '/rapports'
+      preLoaderRoute: typeof RapportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/utilisateurs': {
+      id: '/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/utilisateurs'
+      preLoaderRoute: typeof UtilisateursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campagnes/': {
@@ -597,6 +657,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ParametresRoute: ParametresRoute,
+  RapportsRoute: RapportsRoute,
+  UtilisateursRoute: UtilisateursRoute,
   CampagnesIdRoute: CampagnesIdRoute,
   CampagnesNouvelleRoute: CampagnesNouvelleRoute,
   CatalogueIdRoute: CatalogueIdRoute,

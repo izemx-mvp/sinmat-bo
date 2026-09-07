@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Panneau } from "@/components/app/ui-kit";
 
+const SECTIONS = [
+  { id: "societe", titre: "Société", description: "Informations légales et de contact", Icone: Building2 },
+  { id: "facturation", titre: "Facturation", description: "Paramètres de calcul et de paiement", Icone: CreditCard },
+  { id: "notifications", titre: "Notifications", description: "Canaux de communication", Icone: Mail },
+  { id: "securite", titre: "Sécurité", description: "Accès et authentification", Icone: Shield },
+  { id: "apparence", titre: "Apparence", description: "Thème et langue", Icone: Palette },
+];
+
 export const Route = createFileRoute("/parametres")({
   head: () => ({
     meta: [
