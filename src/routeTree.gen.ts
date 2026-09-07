@@ -14,6 +14,7 @@ import { Route as CampagnesIndexRouteImport } from './routes/campagnes.index'
 import { Route as CampagnesIdRouteImport } from './routes/campagnes.$id'
 import { Route as CampagnesNouvelleRouteImport } from './routes/campagnes.nouvelle'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
+import { Route as ClientsIdRouteImport } from './routes/clients.$id'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
 
@@ -42,6 +43,11 @@ const ClientsIndexRoute = ClientsIndexRouteImport.update({
   path: '/clients/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientsIdRoute = ClientsIdRouteImport.update({
+  id: '/clients/$id',
+  path: '/clients/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProspectsIndexRoute = ProspectsIndexRouteImport.update({
   id: '/prospects/',
   path: '/prospects/',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
+  '/clients/$id': typeof ClientsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
   '/campagnes/': typeof CampagnesIndexRoute
   '/clients/': typeof ClientsIndexRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
+  '/clients/$id': typeof ClientsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
   '/campagnes': typeof CampagnesIndexRoute
   '/clients': typeof ClientsIndexRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
+  '/clients/$id': typeof ClientsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
   '/campagnes/': typeof CampagnesIndexRoute
   '/clients/': typeof ClientsIndexRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
+    | '/clients/$id'
     | '/prospects/$id'
     | '/campagnes/'
     | '/clients/'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
+    | '/clients/$id'
     | '/prospects/$id'
     | '/campagnes'
     | '/clients'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
+    | '/clients/$id'
     | '/prospects/$id'
     | '/campagnes/'
     | '/clients/'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CampagnesIdRoute: typeof CampagnesIdRoute
   CampagnesNouvelleRoute: typeof CampagnesNouvelleRoute
+  ClientsIdRoute: typeof ClientsIdRoute
   ProspectsIdRoute: typeof ProspectsIdRoute
   CampagnesIndexRoute: typeof CampagnesIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clients/$id': {
+      id: '/clients/$id'
+      path: '/clients/$id'
+      fullPath: '/clients/$id'
+      preLoaderRoute: typeof ClientsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/prospects/': {
       id: '/prospects/'
       path: '/prospects'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CampagnesIdRoute: CampagnesIdRoute,
   CampagnesNouvelleRoute: CampagnesNouvelleRoute,
+  ClientsIdRoute: ClientsIdRoute,
   ProspectsIdRoute: ProspectsIdRoute,
   CampagnesIndexRoute: CampagnesIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
