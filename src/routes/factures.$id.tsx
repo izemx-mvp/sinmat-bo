@@ -125,7 +125,8 @@ function FicheFacture() {
           </Panneau>
 
           {reste > 0 && (
-            <Panneau titre="Enregistrer un paiement" className="scroll-mt-6" id="paiement-form">
+            <div id="paiement-form" className="scroll-mt-6">
+            <Panneau titre="Enregistrer un paiement">
               <div className="grid gap-4 sm:grid-cols-4">
                 <div>
                   <Label className="text-[12.5px]">Montant</Label>
