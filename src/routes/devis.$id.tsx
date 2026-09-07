@@ -1,0 +1,160 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Cellule, DocumentsLies, EnTeteDetail, Infos, Ligne, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
+import { Lien, useAller } from "@/components/app/nav";
+import { useSinmat } from "@/data/store";
+import { formatDH, formatDate, nomUtilisateur, produits } from "@/data/sinmat";
+
+export const Route = createFileRoute("/devis/$id")({
+  head: ({ params }) => ({
+    meta: [
+      { title: `Devis ${params.id} — Gestion SINMAT` },
+      { name: "description", content: "Fiche détaillée d'un devis SINMAT : lignes, totaux, statut et actions." },
+      { property: "og:title", content: `Devis ${params.id} — Gestion SINMAT` },
+      { property: "og:description", content: "Détail de la proposition commerciale." },
+    ],
+  }),
+  component: FicheDevis,
+});
+
+function FicheDevis() {
+  const { id } = Route.useParams();
+  const s = useSinmat();
+  const aller = useAller();
+
+  const devis = s.devis.find((d) => d.id === id);
+  if (!devis) {
+    return (
+      <div className="p-6">
+        <VideEtat titre="Devis introuvable" description="Cet enregistrement n'existe pas." />
+      </div>
+    );
+  }
+
+  const client = s.clients.find((c) => c.id === devis.clientId);
+  const commande = s.commandes.find((c) => c.id === devis.commandeId);
+  const opp = s.opportunites.find((o) => o.id === devis.opportuniteId);
+
+  const totalHT = devis.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100), 0);
+  const totalTVA = devis.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (l.tva / 100), 0);
+
+  const accepter = () => {
+    const cmd = s.accepterDevis(devis.id);
+    if (cmd) {
+      toast.success("Devis accepté", { description: `Commande ${cmd.id} créée` });
+      aller(`/commandes/${cmd.id}`);
+    }
+  };
+
+  const refuser = () => {
+    toast.info("Devis marqué refusé");
+  };
+
+  return (
+    <div>
+      <EnTeteDetail
+        retour={{ to: "/devis", libelle: "Devis" }}
+        titre={devis.id}
+        badges={<Statut valeur={devis.statut} />}
+        sousTitre={`${client?.nom ?? "—"} · ${devis.type} · Responsable : ${nomUtilisateur(devis.responsableId)}`}
+        actions={
+          <>
+            {devis.statut === "Brouillon" && (
+              <Button variant="outline" size="sm" onClick={() => toast.success("Devis envoyé au client")}>
+                Envoyer
+              </Button>
+            )}
+            {(devis.statut === "Envoyé" || devis.statut === "En attente") && (
+              <>
+                <Button variant="outline" size="sm" onClick={refuser}>
+                  Marquer refusé
+                </Button>
+                <Button size="sm" onClick={accepter}>
+                  Accepter → commande
+                </Button>
+              </>
+            )}
+            {commande && (
+              <Lien to={`/commandes/${commande.id}`}>
+                <Button variant="outline" size="sm">Voir la commande</Button>
+              </Lien>
+            )}
+          </>
+        }
+      />
+
+      <div className="grid gap-5 p-6 lg:grid-cols-3">
+        <div className="space-y-5 lg:col-span-2">
+          <Panneau titre="Lignes du devis" bodyClassName="p-0">
+            <Tableau colonnes={["Produit", "Quantité", "Durée", "Prix unitaire", "Remise", "TVA", "Total TTC"]}>
+              {devis.lignes.map((l) => {
+                const produit = produits.find((p) => p.id === l.produitId);
+                const total = l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100);
+                return (
+                  <Ligne key={`${l.produitId}-${l.duree}`}>
+                    <Cellule className="max-w-[280px]">
+                      <span className="block truncate font-semibold text-foreground">{l.designation}</span>
+                      <span className="block text-[11.5px] text-muted-foreground">{produit?.reference ?? l.produitId}</span>
+                    </Cellule>
+                    <Cellule num>{l.quantite}</Cellule>
+                    <Cellule>{l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : "—"}</Cellule>
+                    <Cellule num>{formatDH(l.prixUnitaire)}</Cellule>
+                    <Cellule num>{l.remise} %</Cellule>
+                    <Cellule num>{l.tva} %</Cellule>
+                    <Cellule num className="font-semibold">{formatDH(total)}</Cellule>
+                  </Ligne>
+                );
+              })}
+            </Tableau>
+            <div className="border-t border-border bg-surface-muted/50 px-5 py-3">
+              <div className="flex justify-between text-[13px]">
+                <span className="text-muted-foreground">Total HT</span>
+                <span className="num font-semibold">{formatDH(totalHT)}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-[13px]">
+                <span className="text-muted-foreground">TVA (20 %)</span>
+                <span className="num font-semibold">{formatDH(totalTVA)}</span>
+              </div>
+              <div className="mt-2 flex justify-between border-t border-border pt-2 text-[15px]">
+                <span className="font-semibold text-foreground">Total TTC</span>
+                <span className="num font-bold text-foreground">{formatDH(devis.montant)}</span>
+              </div>
+            </div>
+          </Panneau>
+
+          <Panneau titre="Conditions">
+            <p className="text-[13.5px] leading-relaxed text-foreground/85">
+              {devis.conditions || "Aucune condition spécifique renseignée."}
+            </p>
+          </Panneau>
+        </div>
+
+        <div className="space-y-5">
+          <Panneau titre="Informations">
+            <Infos
+              donnees={[
+                { label: "Client", valeur: client?.nom ?? "—" },
+                { label: "Type", valeur: devis.type },
+                { label: "Date", valeur: formatDate(devis.date) },
+                { label: "Expiration", valeur: formatDate(devis.expiration) },
+                { label: "Responsable", valeur: nomUtilisateur(devis.responsableId) },
+                { label: "Montant TTC", valeur: formatDH(devis.montant) },
+              ]}
+            />
+          </Panneau>
+
+          <Panneau titre="Documents liés">
+            <DocumentsLies
+              elements={[
+                ...(opp ? [{ label: "Opportunité", ref: opp.id, to: `/opportunites/${opp.id}` }] : []),
+                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
+                ...(commande?.factureId ? [{ label: "Facture", ref: commande.factureId, to: `/factures/${commande.factureId}` }] : []),
+              ]}
+            />
+          </Panneau>
+        </div>
+      </div>
+    </div>
+  );
+}
