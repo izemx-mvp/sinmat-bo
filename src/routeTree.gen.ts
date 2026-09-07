@@ -32,6 +32,7 @@ import { Route as LivraisonsIdRouteImport } from './routes/livraisons.$id'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsIdRouteImport } from './routes/locations.$id'
 import { Route as OpportunitesIndexRouteImport } from './routes/opportunites.index'
+import { Route as OpportunitesIdRouteImport } from './routes/opportunites.$id'
 import { Route as PaiementsIndexRouteImport } from './routes/paiements.index'
 import { Route as PaiementsIdRouteImport } from './routes/paiements.$id'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
@@ -156,6 +157,11 @@ const OpportunitesIndexRoute = OpportunitesIndexRouteImport.update({
   path: '/opportunites/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpportunitesIdRoute = OpportunitesIdRouteImport.update({
+  id: '/opportunites/$id',
+  path: '/opportunites/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PaiementsIndexRoute = PaiementsIndexRouteImport.update({
   id: '/paiements/',
   path: '/paiements/',
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/factures/$id': typeof FacturesIdRoute
   '/livraisons/$id': typeof LivraisonsIdRoute
   '/locations/$id': typeof LocationsIdRoute
+  '/opportunites/$id': typeof OpportunitesIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
   '/retours/$id': typeof RetoursIdRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/factures/$id': typeof FacturesIdRoute
   '/livraisons/$id': typeof LivraisonsIdRoute
   '/locations/$id': typeof LocationsIdRoute
+  '/opportunites/$id': typeof OpportunitesIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
   '/retours/$id': typeof RetoursIdRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/factures/$id': typeof FacturesIdRoute
   '/livraisons/$id': typeof LivraisonsIdRoute
   '/locations/$id': typeof LocationsIdRoute
+  '/opportunites/$id': typeof OpportunitesIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
   '/retours/$id': typeof RetoursIdRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/factures/$id'
     | '/livraisons/$id'
     | '/locations/$id'
+    | '/opportunites/$id'
     | '/paiements/$id'
     | '/prospects/$id'
     | '/retours/$id'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/factures/$id'
     | '/livraisons/$id'
     | '/locations/$id'
+    | '/opportunites/$id'
     | '/paiements/$id'
     | '/prospects/$id'
     | '/retours/$id'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/factures/$id'
     | '/livraisons/$id'
     | '/locations/$id'
+    | '/opportunites/$id'
     | '/paiements/$id'
     | '/prospects/$id'
     | '/retours/$id'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   FacturesIdRoute: typeof FacturesIdRoute
   LivraisonsIdRoute: typeof LivraisonsIdRoute
   LocationsIdRoute: typeof LocationsIdRoute
+  OpportunitesIdRoute: typeof OpportunitesIdRoute
   PaiementsIdRoute: typeof PaiementsIdRoute
   ProspectsIdRoute: typeof ProspectsIdRoute
   RetoursIdRoute: typeof RetoursIdRoute
@@ -596,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpportunitesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/opportunites/$id': {
+      id: '/opportunites/$id'
+      path: '/opportunites/$id'
+      fullPath: '/opportunites/$id'
+      preLoaderRoute: typeof OpportunitesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/paiements/': {
       id: '/paiements/'
       path: '/paiements'
@@ -670,6 +690,7 @@ const rootRouteChildren: RootRouteChildren = {
   FacturesIdRoute: FacturesIdRoute,
   LivraisonsIdRoute: LivraisonsIdRoute,
   LocationsIdRoute: LocationsIdRoute,
+  OpportunitesIdRoute: OpportunitesIdRoute,
   PaiementsIdRoute: PaiementsIdRoute,
   ProspectsIdRoute: ProspectsIdRoute,
   RetoursIdRoute: RetoursIdRoute,
