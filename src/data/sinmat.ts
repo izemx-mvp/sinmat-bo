@@ -409,7 +409,7 @@ export const utilisateurs: Utilisateur[] = [
   },
 ];
 
-export const utilisateurCourant = utilisateurs[0];
+export const utilisateurCourant = utilisateurs[0]!;
 
 export const nomUtilisateur = (id: string) =>
   utilisateurs.find((u) => u.id === id)?.nom ?? "—";
