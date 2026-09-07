@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CampagnesIndexRouteImport } from './routes/campagnes.index'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampagnesIndexRoute = CampagnesIndexRouteImport.update({
+  id: '/campagnes/',
+  path: '/campagnes/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProspectsIndexRoute = ProspectsIndexRouteImport.update({
@@ -32,30 +38,34 @@ const ProspectsIdRoute = ProspectsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/campagnes/': typeof CampagnesIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/campagnes': typeof CampagnesIndexRoute
   '/prospects': typeof ProspectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/campagnes/': typeof CampagnesIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/prospects/$id' | '/prospects/'
+  fullPaths: '/' | '/prospects/$id' | '/campagnes/' | '/prospects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/prospects/$id' | '/prospects'
-  id: '__root__' | '/' | '/prospects/$id' | '/prospects/'
+  to: '/' | '/prospects/$id' | '/campagnes' | '/prospects'
+  id: '__root__' | '/' | '/prospects/$id' | '/campagnes/' | '/prospects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProspectsIdRoute: typeof ProspectsIdRoute
+  CampagnesIndexRoute: typeof CampagnesIndexRoute
   ProspectsIndexRoute: typeof ProspectsIndexRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campagnes/': {
+      id: '/campagnes/'
+      path: '/campagnes'
+      fullPath: '/campagnes/'
+      preLoaderRoute: typeof CampagnesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prospects/': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProspectsIdRoute: ProspectsIdRoute,
+  CampagnesIndexRoute: CampagnesIndexRoute,
   ProspectsIndexRoute: ProspectsIndexRoute,
 }
 export const routeTree = rootRouteImport
