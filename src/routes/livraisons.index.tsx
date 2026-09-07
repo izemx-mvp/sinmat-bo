@@ -20,7 +20,7 @@ export const Route = createFileRoute("/livraisons/")({
   component: PageLivraisons,
 });
 
-const TABS = ["Toutes", "À préparer", "Prête", "En route", "Livrée", "Annulée"];
+const TABS = ["Toutes", "À préparer", "Préparation en cours", "Prête", "Planifiée", "En livraison", "Livrée"];
 
 function PageLivraisons() {
   const { livraisons, clients } = useSinmat();
@@ -40,10 +40,11 @@ function PageLivraisons() {
   const compteurs = {
     Toutes: livraisons.length,
     "À préparer": livraisons.filter((l) => l.statut === "À préparer").length,
+    "Préparation en cours": livraisons.filter((l) => l.statut === "Préparation en cours").length,
     Prête: livraisons.filter((l) => l.statut === "Prête").length,
-    "En route": livraisons.filter((l) => l.statut === "En route").length,
+    Planifiée: livraisons.filter((l) => l.statut === "Planifiée").length,
+    "En livraison": livraisons.filter((l) => l.statut === "En livraison").length,
     Livrée: livraisons.filter((l) => l.statut === "Livrée").length,
-    Annulée: livraisons.filter((l) => l.statut === "Annulée").length,
   };
 
   return (

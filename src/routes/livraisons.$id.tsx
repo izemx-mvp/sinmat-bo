@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { DocumentsLies, EnTeteDetail, Infos, Panneau, RailStatut, Statut, VideEtat } from "@/components/app/ui-kit";
 import { Lien } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
-import { formatDate } from "@/data/sinmat";
+import { formatDate, type Livraison } from "@/data/sinmat";
 
-const ETAPES: Array<{ label: string; value: string }> = [
+const ETAPES: Array<{ label: string; value: Livraison["statut"] }> = [
   { label: "À préparer", value: "À préparer" },
+  { label: "Préparation en cours", value: "Préparation en cours" },
   { label: "Prête", value: "Prête" },
-  { label: "En route", value: "En route" },
+  { label: "Planifiée", value: "Planifiée" },
+  { label: "En livraison", value: "En livraison" },
   { label: "Livrée", value: "Livrée" },
 ];
 
