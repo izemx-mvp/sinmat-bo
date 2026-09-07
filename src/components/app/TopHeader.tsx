@@ -1,4 +1,5 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
+import { Lien, useAller } from "./nav";
 import { Bell, ChevronDown, Plus, Search } from "lucide-react";
 import {
   DropdownMenu,
@@ -64,7 +65,7 @@ const CREATIONS = [
 
 export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const navigate = useNavigate();
+  const navigate = useAller();
   const base = "/" + (pathname.split("/")[1] ?? "");
   const meta = META[pathname] ?? META[base] ?? META["/"]!;
 
@@ -118,7 +119,7 @@ export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void
           <ul className="max-h-[360px] divide-y divide-border overflow-y-auto">
             {notificationsSeed.map((n) => (
               <li key={n.id}>
-                <Link
+                <Lien
                   to={n.lien}
                   className="flex gap-3 px-4 py-3 transition-colors hover:bg-surface-muted"
                 >
@@ -145,7 +146,7 @@ export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void
                       {n.date}
                     </span>
                   </span>
-                </Link>
+                </Lien>
               </li>
             ))}
           </ul>
@@ -162,7 +163,7 @@ export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void
           <DropdownMenuLabel>Créer un enregistrement</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {CREATIONS.map((c) => (
-            <DropdownMenuItem key={c.label} onSelect={() => navigate({ to: c.to })}>
+            <DropdownMenuItem key={c.label} onSelect={() => navigate(c.to)}>
               {c.label}
             </DropdownMenuItem>
           ))}
@@ -184,10 +185,10 @@ export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void
             <p className="text-[12px] text-muted-foreground">{utilisateurCourant.email}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => navigate({ to: "/parametres" })}>
+          <DropdownMenuItem onSelect={() => navigate("/parametres")}>
             Paramètres
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => navigate({ to: "/utilisateurs" })}>
+          <DropdownMenuItem onSelect={() => navigate("/utilisateurs")}>
             Utilisateurs & rôles
           </DropdownMenuItem>
           <DropdownMenuSeparator />

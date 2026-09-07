@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useAller } from "./nav";
 import {
   CommandDialog,
   CommandEmpty,
@@ -17,13 +17,13 @@ export function CommandPalette({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const navigate = useNavigate();
+  const navigate = useAller();
   const { clients, prospects, opportunites, devis, commandes, factures, locations, produits, livraisons } =
     useSinmat();
 
   const aller = (to: string) => {
     onOpenChange(false);
-    navigate({ to });
+    navigate(to);
   };
 
   return (

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Lien, useAller } from "./nav";
 import { ArrowLeft, ArrowUpRight, Check, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -243,6 +243,7 @@ export function Ligne({
   children: ReactNode;
   className?: string;
 }) {
+  const aller = useAller();
   return (
     <tr
       className={cn(
@@ -255,8 +256,7 @@ export function Ligne({
           ? (e) => {
               const cible = e.target as HTMLElement;
               if (cible.closest("a,button,input")) return;
-              window.history.pushState({}, "", to);
-              window.dispatchEvent(new PopStateEvent("popstate"));
+              aller(to);
             }
           : undefined
       }
@@ -346,12 +346,12 @@ export function EnTeteDetail({
 }) {
   return (
     <div className="border-b border-border bg-surface px-6 py-5">
-      <Link
+      <Lien
         to={retour.to}
         className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" /> {retour.libelle}
-      </Link>
+      </Lien>
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
@@ -435,7 +435,7 @@ export function DocumentsLies({
     <ol className="space-y-1">
       {elements.map((el, i) => (
         <li key={el.ref} className="relative">
-          <Link
+          <Lien
             to={el.to}
             className="flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-2 transition-colors hover:border-border hover:bg-surface-muted"
           >
@@ -446,7 +446,7 @@ export function DocumentsLies({
               <span className="num text-[13px] font-semibold text-foreground">{el.ref}</span>
             </span>
             <ArrowUpRight className="size-4 text-muted-foreground" />
-          </Link>
+          </Lien>
           {i < elements.length - 1 && <span className="ml-6 block h-2 w-px bg-border" />}
         </li>
       ))}
