@@ -24,6 +24,8 @@ import { Route as DevisIdRouteImport } from './routes/devis.$id'
 import { Route as DevisNouveauRouteImport } from './routes/devis.nouveau'
 import { Route as FacturesIndexRouteImport } from './routes/factures.index'
 import { Route as FacturesIdRouteImport } from './routes/factures.$id'
+import { Route as LivraisonsIndexRouteImport } from './routes/livraisons.index'
+import { Route as LivraisonsIdRouteImport } from './routes/livraisons.$id'
 import { Route as LocationsIndexRouteImport } from './routes/locations.index'
 import { Route as LocationsIdRouteImport } from './routes/locations.$id'
 import { Route as OpportunitesIndexRouteImport } from './routes/opportunites.index'
@@ -31,6 +33,8 @@ import { Route as PaiementsIndexRouteImport } from './routes/paiements.index'
 import { Route as PaiementsIdRouteImport } from './routes/paiements.$id'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
+import { Route as RetoursIndexRouteImport } from './routes/retours.index'
+import { Route as RetoursIdRouteImport } from './routes/retours.$id'
 import { Route as VentesIndexRouteImport } from './routes/ventes.index'
 import { Route as VentesIdRouteImport } from './routes/ventes.$id'
 
@@ -109,6 +113,16 @@ const FacturesIdRoute = FacturesIdRouteImport.update({
   path: '/factures/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LivraisonsIndexRoute = LivraisonsIndexRouteImport.update({
+  id: '/livraisons/',
+  path: '/livraisons/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LivraisonsIdRoute = LivraisonsIdRouteImport.update({
+  id: '/livraisons/$id',
+  path: '/livraisons/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LocationsIndexRoute = LocationsIndexRouteImport.update({
   id: '/locations/',
   path: '/locations/',
@@ -144,6 +158,16 @@ const ProspectsIdRoute = ProspectsIdRouteImport.update({
   path: '/prospects/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RetoursIndexRoute = RetoursIndexRouteImport.update({
+  id: '/retours/',
+  path: '/retours/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RetoursIdRoute = RetoursIdRouteImport.update({
+  id: '/retours/$id',
+  path: '/retours/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VentesIndexRoute = VentesIndexRouteImport.update({
   id: '/ventes/',
   path: '/ventes/',
@@ -165,9 +189,11 @@ export interface FileRoutesByFullPath {
   '/devis/$id': typeof DevisIdRoute
   '/devis/nouveau': typeof DevisNouveauRoute
   '/factures/$id': typeof FacturesIdRoute
+  '/livraisons/$id': typeof LivraisonsIdRoute
   '/locations/$id': typeof LocationsIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/retours/$id': typeof RetoursIdRoute
   '/ventes/$id': typeof VentesIdRoute
   '/campagnes/': typeof CampagnesIndexRoute
   '/catalogue/': typeof CatalogueIndexRoute
@@ -175,10 +201,12 @@ export interface FileRoutesByFullPath {
   '/commandes/': typeof CommandesIndexRoute
   '/devis/': typeof DevisIndexRoute
   '/factures/': typeof FacturesIndexRoute
+  '/livraisons/': typeof LivraisonsIndexRoute
   '/locations/': typeof LocationsIndexRoute
   '/opportunites/': typeof OpportunitesIndexRoute
   '/paiements/': typeof PaiementsIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
+  '/retours/': typeof RetoursIndexRoute
   '/ventes/': typeof VentesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -191,9 +219,11 @@ export interface FileRoutesByTo {
   '/devis/$id': typeof DevisIdRoute
   '/devis/nouveau': typeof DevisNouveauRoute
   '/factures/$id': typeof FacturesIdRoute
+  '/livraisons/$id': typeof LivraisonsIdRoute
   '/locations/$id': typeof LocationsIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/retours/$id': typeof RetoursIdRoute
   '/ventes/$id': typeof VentesIdRoute
   '/campagnes': typeof CampagnesIndexRoute
   '/catalogue': typeof CatalogueIndexRoute
@@ -201,10 +231,12 @@ export interface FileRoutesByTo {
   '/commandes': typeof CommandesIndexRoute
   '/devis': typeof DevisIndexRoute
   '/factures': typeof FacturesIndexRoute
+  '/livraisons': typeof LivraisonsIndexRoute
   '/locations': typeof LocationsIndexRoute
   '/opportunites': typeof OpportunitesIndexRoute
   '/paiements': typeof PaiementsIndexRoute
   '/prospects': typeof ProspectsIndexRoute
+  '/retours': typeof RetoursIndexRoute
   '/ventes': typeof VentesIndexRoute
 }
 export interface FileRoutesById {
@@ -218,9 +250,11 @@ export interface FileRoutesById {
   '/devis/$id': typeof DevisIdRoute
   '/devis/nouveau': typeof DevisNouveauRoute
   '/factures/$id': typeof FacturesIdRoute
+  '/livraisons/$id': typeof LivraisonsIdRoute
   '/locations/$id': typeof LocationsIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/retours/$id': typeof RetoursIdRoute
   '/ventes/$id': typeof VentesIdRoute
   '/campagnes/': typeof CampagnesIndexRoute
   '/catalogue/': typeof CatalogueIndexRoute
@@ -228,10 +262,12 @@ export interface FileRoutesById {
   '/commandes/': typeof CommandesIndexRoute
   '/devis/': typeof DevisIndexRoute
   '/factures/': typeof FacturesIndexRoute
+  '/livraisons/': typeof LivraisonsIndexRoute
   '/locations/': typeof LocationsIndexRoute
   '/opportunites/': typeof OpportunitesIndexRoute
   '/paiements/': typeof PaiementsIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
+  '/retours/': typeof RetoursIndexRoute
   '/ventes/': typeof VentesIndexRoute
 }
 export interface FileRouteTypes {
@@ -246,9 +282,11 @@ export interface FileRouteTypes {
     | '/devis/$id'
     | '/devis/nouveau'
     | '/factures/$id'
+    | '/livraisons/$id'
     | '/locations/$id'
     | '/paiements/$id'
     | '/prospects/$id'
+    | '/retours/$id'
     | '/ventes/$id'
     | '/campagnes/'
     | '/catalogue/'
@@ -256,10 +294,12 @@ export interface FileRouteTypes {
     | '/commandes/'
     | '/devis/'
     | '/factures/'
+    | '/livraisons/'
     | '/locations/'
     | '/opportunites/'
     | '/paiements/'
     | '/prospects/'
+    | '/retours/'
     | '/ventes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -272,9 +312,11 @@ export interface FileRouteTypes {
     | '/devis/$id'
     | '/devis/nouveau'
     | '/factures/$id'
+    | '/livraisons/$id'
     | '/locations/$id'
     | '/paiements/$id'
     | '/prospects/$id'
+    | '/retours/$id'
     | '/ventes/$id'
     | '/campagnes'
     | '/catalogue'
@@ -282,10 +324,12 @@ export interface FileRouteTypes {
     | '/commandes'
     | '/devis'
     | '/factures'
+    | '/livraisons'
     | '/locations'
     | '/opportunites'
     | '/paiements'
     | '/prospects'
+    | '/retours'
     | '/ventes'
   id:
     | '__root__'
@@ -298,9 +342,11 @@ export interface FileRouteTypes {
     | '/devis/$id'
     | '/devis/nouveau'
     | '/factures/$id'
+    | '/livraisons/$id'
     | '/locations/$id'
     | '/paiements/$id'
     | '/prospects/$id'
+    | '/retours/$id'
     | '/ventes/$id'
     | '/campagnes/'
     | '/catalogue/'
@@ -308,10 +354,12 @@ export interface FileRouteTypes {
     | '/commandes/'
     | '/devis/'
     | '/factures/'
+    | '/livraisons/'
     | '/locations/'
     | '/opportunites/'
     | '/paiements/'
     | '/prospects/'
+    | '/retours/'
     | '/ventes/'
   fileRoutesById: FileRoutesById
 }
@@ -325,9 +373,11 @@ export interface RootRouteChildren {
   DevisIdRoute: typeof DevisIdRoute
   DevisNouveauRoute: typeof DevisNouveauRoute
   FacturesIdRoute: typeof FacturesIdRoute
+  LivraisonsIdRoute: typeof LivraisonsIdRoute
   LocationsIdRoute: typeof LocationsIdRoute
   PaiementsIdRoute: typeof PaiementsIdRoute
   ProspectsIdRoute: typeof ProspectsIdRoute
+  RetoursIdRoute: typeof RetoursIdRoute
   VentesIdRoute: typeof VentesIdRoute
   CampagnesIndexRoute: typeof CampagnesIndexRoute
   CatalogueIndexRoute: typeof CatalogueIndexRoute
@@ -335,10 +385,12 @@ export interface RootRouteChildren {
   CommandesIndexRoute: typeof CommandesIndexRoute
   DevisIndexRoute: typeof DevisIndexRoute
   FacturesIndexRoute: typeof FacturesIndexRoute
+  LivraisonsIndexRoute: typeof LivraisonsIndexRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
   OpportunitesIndexRoute: typeof OpportunitesIndexRoute
   PaiementsIndexRoute: typeof PaiementsIndexRoute
   ProspectsIndexRoute: typeof ProspectsIndexRoute
+  RetoursIndexRoute: typeof RetoursIndexRoute
   VentesIndexRoute: typeof VentesIndexRoute
 }
 
@@ -449,6 +501,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FacturesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/livraisons/': {
+      id: '/livraisons/'
+      path: '/livraisons'
+      fullPath: '/livraisons/'
+      preLoaderRoute: typeof LivraisonsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/livraisons/$id': {
+      id: '/livraisons/$id'
+      path: '/livraisons/$id'
+      fullPath: '/livraisons/$id'
+      preLoaderRoute: typeof LivraisonsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/locations/': {
       id: '/locations/'
       path: '/locations'
@@ -498,6 +564,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProspectsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/retours/': {
+      id: '/retours/'
+      path: '/retours'
+      fullPath: '/retours/'
+      preLoaderRoute: typeof RetoursIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/retours/$id': {
+      id: '/retours/$id'
+      path: '/retours/$id'
+      fullPath: '/retours/$id'
+      preLoaderRoute: typeof RetoursIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ventes/': {
       id: '/ventes/'
       path: '/ventes'
@@ -525,9 +605,11 @@ const rootRouteChildren: RootRouteChildren = {
   DevisIdRoute: DevisIdRoute,
   DevisNouveauRoute: DevisNouveauRoute,
   FacturesIdRoute: FacturesIdRoute,
+  LivraisonsIdRoute: LivraisonsIdRoute,
   LocationsIdRoute: LocationsIdRoute,
   PaiementsIdRoute: PaiementsIdRoute,
   ProspectsIdRoute: ProspectsIdRoute,
+  RetoursIdRoute: RetoursIdRoute,
   VentesIdRoute: VentesIdRoute,
   CampagnesIndexRoute: CampagnesIndexRoute,
   CatalogueIndexRoute: CatalogueIndexRoute,
@@ -535,10 +617,12 @@ const rootRouteChildren: RootRouteChildren = {
   CommandesIndexRoute: CommandesIndexRoute,
   DevisIndexRoute: DevisIndexRoute,
   FacturesIndexRoute: FacturesIndexRoute,
+  LivraisonsIndexRoute: LivraisonsIndexRoute,
   LocationsIndexRoute: LocationsIndexRoute,
   OpportunitesIndexRoute: OpportunitesIndexRoute,
   PaiementsIndexRoute: PaiementsIndexRoute,
   ProspectsIndexRoute: ProspectsIndexRoute,
+  RetoursIndexRoute: RetoursIndexRoute,
   VentesIndexRoute: VentesIndexRoute,
 }
 export const routeTree = rootRouteImport
