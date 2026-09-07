@@ -136,13 +136,13 @@ function FicheClient() {
               <div className="space-y-5">
                 <Panneau titre="Documents liés">
                   <DocumentsLies
-                    groupes={[
-                      { libelle: "Opportunités", nombre: opps.length, to: "/opportunites" },
-                      { libelle: "Devis", nombre: devis.length, to: "/devis" },
-                      { libelle: "Commandes", nombre: commandes.length, to: "/commandes" },
-                      { libelle: "Factures", nombre: factures.length, to: "/factures" },
-                      { libelle: "Livraisons", nombre: livraisons.length, to: "/livraisons" },
-                      { libelle: "Locations", nombre: locations.length, to: "/locations" },
+                    elements={[
+                      { label: "Opportunités", ref: `${opps.length}`, to: "/opportunites" },
+                      { label: "Devis", ref: `${devis.length}`, to: "/devis" },
+                      { label: "Commandes", ref: `${commandes.length}`, to: "/commandes" },
+                      { label: "Factures", ref: `${factures.length}`, to: "/factures" },
+                      { label: "Livraisons", ref: `${livraisons.length}`, to: "/livraisons" },
+                      { label: "Locations", ref: `${locations.length}`, to: "/locations" },
                     ]}
                   />
                 </Panneau>
@@ -151,7 +151,7 @@ function FicheClient() {
                     evenements={[
                       ...commandes.map((c) => ({
                         date: formatDate(c.date),
-                        libelle: `Commande ${c.id} — ${formatDH(c.total)}`,
+                        libelle: `Commande ${c.id} — ${formatDH(c.montant)}`,
                       })),
                       ...factures.map((f) => ({
                         date: formatDate(f.date),
@@ -188,7 +188,7 @@ function FicheClient() {
               <Ligne key={d.id} to={`/devis/${d.id}`}>
                 <Cellule num>{d.id}</Cellule>
                 <Cellule>{formatDate(d.date)}</Cellule>
-                <Cellule num>{formatDH(d.totalTTC)}</Cellule>
+                <Cellule num>{formatDH(d.montant)}</Cellule>
                 <Cellule>
                   <Statut valeur={d.statut} />
                 </Cellule>
@@ -204,7 +204,7 @@ function FicheClient() {
                 <Cellule num>{c.id}</Cellule>
                 <Cellule>{formatDate(c.date)}</Cellule>
                 <Cellule>{c.type}</Cellule>
-                <Cellule num>{formatDH(c.total)}</Cellule>
+                <Cellule num>{formatDH(c.montant)}</Cellule>
                 <Cellule>
                   <Statut valeur={c.statut} />
                 </Cellule>
@@ -219,8 +219,8 @@ function FicheClient() {
               <Ligne key={f.id} to={`/factures/${f.id}`}>
                 <Cellule num>{f.id}</Cellule>
                 <Cellule>{formatDate(f.date)}</Cellule>
-                <Cellule num>{formatDH(f.totalTTC)}</Cellule>
-                <Cellule num>{formatDH(f.resteDu)}</Cellule>
+                <Cellule num>{formatDH(f.ttc)}</Cellule>
+                <Cellule num>{formatDH(f.ttc - f.paye)}</Cellule>
                 <Cellule>
                   <Statut valeur={f.statut} />
                 </Cellule>
@@ -230,16 +230,14 @@ function FicheClient() {
         )}
 
         {tab === "Paiements" && (
-          <TableSimple vide="Aucun paiement" colonnes={["Référence", "Date", "Mode", "Montant", "Statut"]}>
+          <TableSimple vide="Aucun paiement" colonnes={["Référence", "Date", "Mode", "Montant", "Pièce"]}>
             {paiements.map((p) => (
               <Ligne key={p.id} to={`/paiements/${p.id}`}>
                 <Cellule num>{p.id}</Cellule>
                 <Cellule>{formatDate(p.date)}</Cellule>
                 <Cellule>{p.mode}</Cellule>
                 <Cellule num>{formatDH(p.montant)}</Cellule>
-                <Cellule>
-                  <Statut valeur={p.statut} />
-                </Cellule>
+                <Cellule className="text-muted-foreground">{p.reference}</Cellule>
               </Ligne>
             ))}
           </TableSimple>
