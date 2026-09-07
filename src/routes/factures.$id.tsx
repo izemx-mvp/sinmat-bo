@@ -156,6 +156,7 @@ function FicheFacture() {
                 <Button size="sm" onClick={enregistrer}>Enregistrer le paiement</Button>
               </div>
             </Panneau>
+            </div>
           )}
         </div>
 
