@@ -138,7 +138,7 @@ function FicheCampagne() {
                   { label: "Taux de qualification", valeur: `${Math.round((campagne.qualifies / (campagne.reponses || 1)) * 100)} %` },
                   { label: "Conversion globale", valeur: `${campagne.conversion} %` },
                 ]}
-                recommandation={campagne.insight}
+                recommandation={`${campagne.qualifies} prospects qualifiés à traiter en priorité. Concentrez les relances sur les besoins ${campagne.criteres[0] ?? "identifiés"}.`}
               />
             </div>
           </>
