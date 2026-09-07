@@ -99,7 +99,14 @@ function FicheOpportunite() {
           </Panneau>
 
           {opp.resumeIA && (
-            <AnalyseIA resume={opp.resumeIA} recommandation={opp.prochaineAction} probabilite={opp.probabilite} />
+            <AnalyseIA
+              titre="Analyse IA"
+              recommandation={opp.resumeIA}
+              lignes={[
+                { label: "Probabilité", valeur: `${opp.probabilite}%` },
+                { label: "Prochaine action", valeur: opp.prochaineAction },
+              ]}
+            />
           )}
         </div>
 
@@ -134,8 +141,8 @@ function FicheOpportunite() {
           <Panneau titre="Historique">
             <Chronologie
               evenements={[
-                { date: opp.derniereActivite, titre: "Dernière activité", description: opp.prochaineAction },
-                { date: opp.dateSouhaitee, titre: "Date souhaitée", description: "Livraison / mise à disposition prévue" },
+                { date: opp.derniereActivite, libelle: "Dernière activité", detail: opp.prochaineAction },
+                { date: opp.dateSouhaitee, libelle: "Date souhaitée", detail: "Livraison / mise à disposition prévue" },
               ]}
             />
           </Panneau>
