@@ -174,7 +174,7 @@ function PageOpportunites() {
                     <Statut valeur={o.etape} ton="info" />
                   </Cellule>
                   <Cellule num>{o.probabilite} %</Cellule>
-                  <Cellule className="text-muted-foreground">{formatDate(o.clotureEstimee)}</Cellule>
+                  <Cellule className="text-muted-foreground">{formatDate(o.dateSouhaitee)}</Cellule>
                   <Cellule className="text-muted-foreground">
                     {nomUtilisateur(o.responsableId)}
                   </Cellule>
