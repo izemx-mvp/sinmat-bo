@@ -16,7 +16,7 @@ import {
 import { Cellule, Kpi, Ligne, Onglets, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
-import { formatDH, formatDate } from "@/data/sinmat";
+import { formatDH, formatDate, type Ville } from "@/data/sinmat";
 
 export const Route = createFileRoute("/clients/")({
   head: () => ({
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/clients/")({
 const TABS = ["Tous", "Actifs", "Inactifs", "Encours élevé"];
 
 function PageClients() {
-  const { clients, ajouterClient } = useSinmat();
+  const { clients, locations, ajouterClient } = useSinmat();
   const aller = useAller();
   const [tab, setTab] = useState("Tous");
   const [q, setQ] = useState("");
@@ -50,7 +50,7 @@ function PageClients() {
     contact: "",
     telephone: "",
     email: "",
-    ville: "Casablanca",
+    ville: "Casablanca" as Ville,
     ice: "",
   });
 
@@ -65,7 +65,8 @@ function PageClients() {
     });
   }, [clients, q, tab]);
 
-  const ca = clients.reduce((s, c) => s + c.caTotal, 0);
+  const locationsActives = locations.filter((l) => l.statut !== "Terminée");
+  const ca = clients.reduce((s, c) => s + c.ca, 0);
   const encours = clients.reduce((s, c) => s + c.encours, 0);
 
   const creer = () => {
@@ -81,10 +82,10 @@ function PageClients() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi libelle="Clients actifs" valeur={String(clients.filter((c) => c.statut === "Actif").length)} ton="accent" icone={Building2} />
         <Kpi libelle="Chiffre d'affaires cumulé" valeur={formatDH(ca)} tendance={12} ton="succes" icone={TrendingUp} />
-        <Kpi libelle="Encours total" valeur={formatDH(encours)} detail="Factures non soldées" ton="alerte" icone={Wallet} />
+        <Kpi libelle="Encours total" valeur={formatDH(encours)} detail="Factures non soldées" ton="attention" icone={Wallet} />
         <Kpi
           libelle="Locations en cours"
-          valeur={String(clients.reduce((s, c) => s + c.locationsActives, 0))}
+          valeur={String(locationsActives.length)}
           detail="Matériels chez les clients"
           ton="info"
         />
@@ -114,20 +115,24 @@ function PageClients() {
                   <DialogTitle>Nouveau client</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    ["nom", "Raison sociale"],
-                    ["contact", "Contact principal"],
-                    ["telephone", "Téléphone"],
-                    ["email", "Email"],
-                    ["ville", "Ville"],
-                    ["ice", "ICE"],
-                  ].map(([k, l]) => (
+                  {(
+                    [
+                      ["nom", "Raison sociale"],
+                      ["contact", "Contact principal"],
+                      ["telephone", "Téléphone"],
+                      ["email", "Email"],
+                      ["ville", "Ville"],
+                      ["ice", "ICE"],
+                    ] as const
+                  ).map(([k, l]) => (
                     <div key={k} className={k === "nom" ? "sm:col-span-2" : ""}>
                       <Label className="text-[12.5px]">{l}</Label>
                       <Input
                         className="mt-1"
-                        value={form[k as keyof typeof form]}
-                        onChange={(e) => setForm({ ...form, [k]: e.target.value })}
+                        value={form[k]}
+                        onChange={(e) =>
+                          setForm({ ...form, [k]: e.target.value } as typeof form)
+                        }
                       />
                     </div>
                   ))}
@@ -168,13 +173,13 @@ function PageClients() {
                 </Cellule>
                 <Cellule>{c.ville}</Cellule>
                 <Cellule className="text-muted-foreground">{c.type}</Cellule>
-                <Cellule num>{formatDH(c.caTotal)}</Cellule>
+                <Cellule num>{formatDH(c.ca)}</Cellule>
                 <Cellule num>
                   <span className={c.encours > 0 ? "font-semibold text-warning-strong" : ""}>
                     {formatDH(c.encours)}
                   </span>
                 </Cellule>
-                <Cellule num>{c.locationsActives}</Cellule>
+                <Cellule num>{locationsActives.filter((l) => l.clientId === c.id).length}</Cellule>
                 <Cellule className="text-muted-foreground">{formatDate(c.derniereActivite)}</Cellule>
                 <Cellule>
                   <Statut valeur={c.statut} />
