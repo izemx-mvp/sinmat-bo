@@ -52,11 +52,6 @@ function FicheLivraison() {
     }
   };
 
-  const annuler = () => {
-    s.majStatutLivraison(livraison.id, "Annulée");
-    toast.info("Livraison annulée");
-  };
-
   return (
     <div>
       <EnTeteDetail
@@ -71,11 +66,8 @@ function FicheLivraison() {
                 <Button variant="outline" size="sm">Voir la commande</Button>
               </Lien>
             )}
-            {livraison.statut !== "Livrée" && livraison.statut !== "Annulée" && (
+            {livraison.statut !== "Livrée" && (
               <Button size="sm" onClick={avancer}>Avancer</Button>
-            )}
-            {livraison.statut !== "Livrée" && livraison.statut !== "Annulée" && (
-              <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={annuler}>Annuler</Button>
             )}
           </>
         }
@@ -86,7 +78,7 @@ function FicheLivraison() {
           <Panneau titre="Suivi">
             <RailStatut
               etapes={ETAPES.map((e) => e.label)}
-              actif={ETAPES.findIndex((e) => e.value === livraison.statut)}
+              courante={ETAPES.findIndex((e) => e.value === livraison.statut)}
             />
           </Panneau>
 

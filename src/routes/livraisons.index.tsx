@@ -52,7 +52,7 @@ function PageLivraisons() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi libelle="Livraisons" valeur={String(livraisons.length)} ton="info" icone={Truck} />
         <Kpi libelle="À préparer" valeur={String(compteurs["À préparer"])} ton="attention" />
-        <Kpi libelle="En route" valeur={String(compteurs["En route"])} ton="accent" />
+        <Kpi libelle="En livraison" valeur={String(compteurs["En livraison"])} ton="accent" />
         <Kpi libelle="Livrées" valeur={String(compteurs.Livrée)} ton="succes" />
       </div>
 
