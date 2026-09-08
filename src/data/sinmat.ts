@@ -11,6 +11,15 @@ export type Ville =
   | "Kénitra"
   | "Marrakech";
 
+export const VILLES: readonly Ville[] = [
+  "Casablanca",
+  "Tanger",
+  "Rabat",
+  "Tétouan",
+  "Kénitra",
+  "Marrakech",
+];
+
 export type TypeActivite = "Vente" | "Location";
 
 export interface Utilisateur {
