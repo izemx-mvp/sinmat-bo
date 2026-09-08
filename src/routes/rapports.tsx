@@ -17,7 +17,7 @@ export const Route = createFileRoute("/rapports")({
 });
 
 function PageRapports() {
-  const { ventes, locations, factures, paiements, commandes, opportunites, clients, prospects } = useSinmat();
+  const { ventes, locations, factures, paiements, opportunites, clients, prospects } = useSinmat();
 
   const caVentes = ventes.filter((v) => v.statut !== "Annulée").reduce((s, v) => s + v.montant, 0);
   const caLocations = locations.filter((l) => l.statut !== "Terminée" || l.montant > 0).reduce((s, l) => s + l.montant, 0);
@@ -31,7 +31,7 @@ function PageRapports() {
     { label: "Qualifié", value: opportunites.filter((o) => o.etape === "Qualifié").length },
     { label: "Devis à préparer", value: opportunites.filter((o) => o.etape === "Devis à préparer").length },
     { label: "Devis envoyé", value: opportunites.filter((o) => o.etape === "Devis envoyé").length },
-    { label: "Négociation", value: opportunites.filter((o) => o.etape === "Négociation").length },
+    { label: "Négociation", value: opportunites.filter((o) => o.etape === "Devis envoyé").length },
     { label: "Confirmé", value: opportunites.filter((o) => o.etape === "Confirmé").length },
     { label: "Gagné", value: opportunites.filter((o) => o.etape === "Gagné").length },
   ];
@@ -76,8 +76,8 @@ function PageRapports() {
               <p className="num mt-1 font-display text-[22px] font-bold">{clients.length}</p>
             </div>
             <div className="rounded-lg border border-border bg-surface-muted/50 p-4">
-              <p className="section-label">Commandes</p>
-              <p className="num mt-1 font-display text-[22px] font-bold">{commandes.length}</p>
+              <p className="section-label">Locations</p>
+              <p className="num mt-1 font-display text-[22px] font-bold">{locations.length}</p>
             </div>
             <div className="rounded-lg border border-border bg-surface-muted/50 p-4">
               <p className="section-label">Taux conversion</p>

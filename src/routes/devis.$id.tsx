@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Cellule, DocumentsLies, EnTeteDetail, Infos, Ligne, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { Lien, useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
+import { VisionneuseDocument } from "@/components/app/DocumentPDF";
 import { formatDH, formatDate, nomUtilisateur, produits } from "@/data/sinmat";
 
 export const Route = createFileRoute("/devis/$id")({
@@ -33,17 +34,16 @@ function FicheDevis() {
   }
 
   const client = s.clients.find((c) => c.id === devis.clientId);
-  const commande = s.commandes.find((c) => c.id === devis.commandeId);
   const opp = s.opportunites.find((o) => o.id === devis.opportuniteId);
 
   const totalHT = devis.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100), 0);
   const totalTVA = devis.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (l.tva / 100), 0);
 
   const accepter = () => {
-    const cmd = s.accepterDevis(devis.id);
-    if (cmd) {
-      toast.success("Devis accepté", { description: `Commande ${cmd.id} créée` });
-      aller(`/commandes/${cmd.id}`);
+    const res = s.accepterDevis(devis.id);
+    if (res) {
+      toast.success("Devis accepté", { description: `${res.type} ${res.id} créée` });
+      aller(res.type === "Vente" ? `/ventes/${res.id}` : `/locations/${res.id}`);
     }
   };
 
@@ -60,8 +60,36 @@ function FicheDevis() {
         sousTitre={`${client?.nom ?? "—"} · ${devis.type} · Responsable : ${nomUtilisateur(devis.responsableId)}`}
         actions={
           <>
+            <VisionneuseDocument
+              doc={{
+                type: "Devis",
+                reference: devis.id,
+                date: devis.date,
+                echeance: devis.expiration,
+                echeanceLabel: "Validité",
+                client: {
+                  nom: client?.nom ?? "—",
+                  contact: client?.contact,
+                  adresse: client?.adresse,
+                  ville: client?.ville,
+                  ice: client?.ice,
+                },
+                lignes: devis.lignes.map((l) => ({
+                  designation: l.designation,
+                  reference: produits.find((p) => p.id === l.produitId)?.reference,
+                  quantite: l.quantite,
+                  duree: l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : undefined,
+                  prixUnitaire: l.prixUnitaire,
+                  total: Math.round(l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100)),
+                })),
+                totalHT: Math.round(totalHT),
+                totalTVA: Math.round(totalTVA),
+                totalTTC: devis.montant,
+                conditions: devis.conditions,
+              }}
+            />
             {devis.statut === "Brouillon" && (
-              <Button variant="outline" size="sm" onClick={() => toast.success("Devis envoyé au client")}>
+              <Button variant="outline" size="sm" onClick={() => { s.envoyerDevis(devis.id); toast.success("Devis envoyé au client"); }}>
                 Envoyer
               </Button>
             )}
@@ -71,13 +99,18 @@ function FicheDevis() {
                   Marquer refusé
                 </Button>
                 <Button size="sm" onClick={accepter}>
-                  Accepter → commande
+                  Accepter le devis
                 </Button>
               </>
             )}
-            {commande && (
-              <Lien to={`/commandes/${commande.id}`}>
-                <Button variant="outline" size="sm">Voir la commande</Button>
+            {devis.venteId && (
+              <Lien to={`/ventes/${devis.venteId}`}>
+                <Button variant="outline" size="sm">Voir la vente</Button>
+              </Lien>
+            )}
+            {devis.locationId && (
+              <Lien to={`/locations/${devis.locationId}`}>
+                <Button variant="outline" size="sm">Voir la location</Button>
               </Lien>
             )}
           </>
@@ -148,8 +181,8 @@ function FicheDevis() {
             <DocumentsLies
               elements={[
                 ...(opp ? [{ label: "Opportunité", ref: opp.id, to: `/opportunites/${opp.id}` }] : []),
-                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
-                ...(commande?.factureId ? [{ label: "Facture", ref: commande.factureId, to: `/factures/${commande.factureId}` }] : []),
+                ...(devis.venteId ? [{ label: "Vente", ref: devis.venteId, to: `/ventes/${devis.venteId}` }] : []),
+                ...(devis.locationId ? [{ label: "Location", ref: devis.locationId, to: `/locations/${devis.locationId}` }] : []),
               ]}
             />
           </Panneau>

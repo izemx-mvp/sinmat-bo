@@ -41,7 +41,6 @@ function FicheLivraison() {
   }
 
   const client = s.clients.find((c) => c.id === livraison.clientId);
-  const commande = s.commandes.find((c) => c.id === livraison.commandeId);
 
   const avancer = () => {
     const idx = ETAPES.findIndex((e) => e.value === livraison.statut);
@@ -61,11 +60,9 @@ function FicheLivraison() {
         sousTitre={`${client?.nom ?? "—"} · ${livraison.ville}`}
         actions={
           <>
-            {commande && (
-              <Lien to={`/commandes/${commande.id}`}>
-                <Button variant="outline" size="sm">Voir la commande</Button>
-              </Lien>
-            )}
+            <Lien to={livraison.origineType === "Vente" ? `/ventes/${livraison.origineId}` : `/locations/${livraison.origineId}`}>
+              <Button variant="outline" size="sm">Voir la {livraison.origineType.toLowerCase()}</Button>
+            </Lien>
             {livraison.statut !== "Livrée" && (
               <Button size="sm" onClick={avancer}>Avancer</Button>
             )}
@@ -112,7 +109,7 @@ function FicheLivraison() {
           <Panneau titre="Documents liés">
             <DocumentsLies
               elements={[
-                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
+                { label: livraison.origineType, ref: livraison.origineId, to: livraison.origineType === "Vente" ? `/ventes/${livraison.origineId}` : `/locations/${livraison.origineId}` },
               ]}
             />
           </Panneau>

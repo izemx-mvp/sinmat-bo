@@ -17,7 +17,7 @@ export const Route = createFileRoute("/paiements/$id")({
 
 function FichePaiement() {
   const { id } = Route.useParams();
-  const { paiements, clients, factures, commandes } = useSinmat();
+  const { paiements, clients, factures } = useSinmat();
 
   const paiement = paiements.find((p) => p.id === id);
   if (!paiement) {
@@ -30,7 +30,6 @@ function FichePaiement() {
 
   const client = clients.find((c) => c.id === paiement.clientId);
   const facture = factures.find((f) => f.id === paiement.factureId);
-  const commande = commandes.find((c) => c.id === paiement.commandeId);
 
   return (
     <div>
@@ -79,7 +78,7 @@ function FichePaiement() {
             <DocumentsLies
               elements={[
                 ...(facture ? [{ label: "Facture", ref: facture.id, to: `/factures/${facture.id}` }] : []),
-                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
+                ...(facture ? [{ label: facture.origineType, ref: facture.origineId, to: facture.origineType === "Vente" ? `/ventes/${facture.origineId}` : `/locations/${facture.origineId}` }] : []),
               ]}
             />
           </Panneau>

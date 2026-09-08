@@ -77,7 +77,7 @@ function PagePaiements() {
             <VideEtat titre="Aucun paiement" description="Aucun paiement ne correspond à votre recherche." />
           </div>
         ) : (
-          <Tableau colonnes={["Référence", "Client", "Facture", "Date", "Mode", "Montant", "Référence bancaire", "Commande"]}>
+          <Tableau colonnes={["Référence", "Client", "Facture", "Date", "Mode", "Montant", "Référence bancaire"]}>
             {filtres.map((p) => {
               const client = clients.find((c) => c.id === p.clientId);
               return (
@@ -94,7 +94,6 @@ function PagePaiements() {
                   </Cellule>
                   <Cellule num className="font-semibold">{formatDH(p.montant)}</Cellule>
                   <Cellule num>{p.reference}</Cellule>
-                  <Cellule num>{p.commandeId}</Cellule>
                 </Ligne>
               );
             })}

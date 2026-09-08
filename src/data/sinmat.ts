@@ -11,6 +11,15 @@ export type Ville =
   | "Kénitra"
   | "Marrakech";
 
+export const VILLES: readonly Ville[] = [
+  "Casablanca",
+  "Tanger",
+  "Rabat",
+  "Tétouan",
+  "Kénitra",
+  "Marrakech",
+];
+
 export type TypeActivite = "Vente" | "Location";
 
 export interface Utilisateur {
@@ -90,7 +99,7 @@ export interface Client {
   rc: string;
   type: "Vente" | "Location" | "Vente & Location";
   statut: "Actif" | "Inactif";
-  commandes: number;
+  operations: number;
   ca: number;
   encours: number;
   derniereActivite: string;
@@ -103,7 +112,6 @@ export type EtapePipeline =
   | "Qualifié"
   | "Devis à préparer"
   | "Devis envoyé"
-  | "Négociation"
   | "Confirmé"
   | "Gagné";
 
@@ -112,7 +120,6 @@ export const ETAPES_PIPELINE: EtapePipeline[] = [
   "Qualifié",
   "Devis à préparer",
   "Devis envoyé",
-  "Négociation",
   "Confirmé",
   "Gagné",
 ];
@@ -139,7 +146,20 @@ export interface Opportunite {
   resumeIA: string;
   probabilite: number;
   devisId?: string | undefined;
+  venteId?: string | undefined;
+  locationId?: string | undefined;
+  modeCreation?: ("IA" | "Manuel") | undefined;
+  conversationId?: string | undefined;
+  confianceIA?: number | undefined;
+  criteresIA?: string[] | undefined;
+  historiqueEtapes?:
+    | { etape: EtapePipeline; date: string; acteur: string; mode: "IA" | "Manuel" }[]
+    | undefined;
 }
+
+/** Origine d'une opportunité : générée par l'agent IA ou saisie manuellement. */
+export const origineOpportunite = (o: Opportunite): "IA" | "Manuel" =>
+  o.modeCreation ?? (o.source.toLowerCase().includes("ia") ? "IA" : "Manuel");
 
 export interface Produit {
   id: string;
@@ -184,47 +204,30 @@ export interface Devis {
   statut: "Brouillon" | "Envoyé" | "En attente" | "Accepté" | "Refusé" | "Expiré";
   lignes: LigneDocument[];
   conditions: string;
-  commandeId?: string | undefined;
-}
-
-export interface Commande {
-  id: string;
-  clientId: string;
-  devisId?: string | undefined;
-  type: TypeActivite;
-  date: string;
-  montant: number;
-  statut:
-    | "À confirmer"
-    | "Confirmée"
-    | "À préparer"
-    | "Prête"
-    | "En livraison"
-    | "Livrée"
-    | "Terminée"
-    | "Annulée";
-  paiement: "Non payé" | "Acompte" | "Partiellement payé" | "Payé";
-  livraisonId?: string | undefined;
-  factureId?: string | undefined;
   venteId?: string | undefined;
   locationId?: string | undefined;
-  lignes: LigneDocument[];
-  notes: string;
-  responsableId: string;
 }
 
 export interface Vente {
   id: string;
-  commandeId: string;
+  devisId?: string | undefined;
+  opportuniteId?: string | undefined;
   clientId: string;
   date: string;
   montant: number;
   statut: "Brouillon" | "Confirmée" | "En préparation" | "Payée" | "Livrée" | "Annulée";
+  paiement: "Non payé" | "Acompte" | "Partiellement payé" | "Payé";
+  lignes: LigneDocument[];
+  factureId?: string | undefined;
+  livraisonId?: string | undefined;
+  notes: string;
+  responsableId: string;
 }
 
 export interface Location {
   id: string;
-  commandeId: string;
+  devisId?: string | undefined;
+  opportuniteId?: string | undefined;
   clientId: string;
   produitId: string;
   quantite: number;
@@ -244,12 +247,21 @@ export interface Location {
   responsableChantier: string;
   telephoneChantier: string;
   retourId?: string | undefined;
+  paiement: "Non payé" | "Acompte" | "Partiellement payé" | "Payé";
+  factureId?: string | undefined;
+  livraisonId?: string | undefined;
+  notes: string;
+  responsableId: string;
 }
+
+export type OrigineType = "Vente" | "Location";
 
 export interface Facture {
   id: string;
   clientId: string;
-  commandeId: string;
+  origineType: OrigineType;
+  origineId: string;
+  devisId?: string | undefined;
   date: string;
   echeance: string;
   ht: number;
@@ -262,7 +274,6 @@ export interface Paiement {
   id: string;
   clientId: string;
   factureId: string;
-  commandeId: string;
   montant: number;
   date: string;
   mode: "Virement" | "Chèque" | "Espèces" | "Carte" | "Autre";
@@ -272,7 +283,8 @@ export interface Paiement {
 
 export interface Livraison {
   id: string;
-  commandeId: string;
+  origineType: OrigineType;
+  origineId: string;
   clientId: string;
   chantier: string;
   ville: Ville;
@@ -355,12 +367,12 @@ export const joursDepuis = (iso: string) =>
 export const utilisateurs: Utilisateur[] = [
   {
     id: "U1",
-    nom: "Yassine El Mansouri",
-    email: "y.elmansouri@sinmat.ma",
+    nom: "FatimaEzzahra Seffari",
+    email: "f.seffari@sinmat.ma",
     role: "Commercial",
     statut: "Actif",
     derniereConnexion: "2026-09-07",
-    initiales: "YM",
+    initiales: "FS",
   },
   {
     id: "U2",
@@ -665,7 +677,7 @@ export const clients: Client[] = [
     rc: "48219",
     type: "Vente & Location",
     statut: "Actif",
-    commandes: 8,
+    operations: 8,
     ca: 426800,
     encours: 32400,
     derniereActivite: "2026-09-07",
@@ -684,7 +696,7 @@ export const clients: Client[] = [
     rc: "112904",
     type: "Location",
     statut: "Actif",
-    commandes: 5,
+    operations: 5,
     ca: 187500,
     encours: 0,
     derniereActivite: "2026-09-06",
@@ -703,7 +715,7 @@ export const clients: Client[] = [
     rc: "50122",
     type: "Vente",
     statut: "Actif",
-    commandes: 6,
+    operations: 6,
     ca: 312400,
     encours: 18600,
     derniereActivite: "2026-09-04",
@@ -722,7 +734,7 @@ export const clients: Client[] = [
     rc: "20874",
     type: "Vente & Location",
     statut: "Actif",
-    commandes: 4,
+    operations: 4,
     ca: 149200,
     encours: 12800,
     derniereActivite: "2026-09-02",
@@ -741,7 +753,7 @@ export const clients: Client[] = [
     rc: "88431",
     type: "Location",
     statut: "Actif",
-    commandes: 7,
+    operations: 7,
     ca: 268900,
     encours: 0,
     derniereActivite: "2026-09-05",
@@ -760,7 +772,7 @@ export const clients: Client[] = [
     rc: "34561",
     type: "Vente",
     statut: "Actif",
-    commandes: 3,
+    operations: 3,
     ca: 98400,
     encours: 0,
     derniereActivite: "2026-08-28",
@@ -779,7 +791,7 @@ export const clients: Client[] = [
     rc: "60193",
     type: "Vente & Location",
     statut: "Actif",
-    commandes: 6,
+    operations: 6,
     ca: 214700,
     encours: 24500,
     derniereActivite: "2026-09-03",
@@ -1283,7 +1295,7 @@ export const opportunites: Opportunite[] = [
     entreprise: "Tanger Travaux",
     type: "Vente",
     montant: 87500,
-    etape: "Négociation",
+    etape: "Devis envoyé",
     produit: "Marteau-piqueur professionnel",
     quantite: 4,
     dateSouhaitee: "2026-09-22",
@@ -1427,7 +1439,7 @@ export const opportunites: Opportunite[] = [
     entreprise: "Atlas Construction",
     type: "Location",
     montant: 15600,
-    etape: "Négociation",
+    etape: "Devis envoyé",
     produit: "Compresseur professionnel 500 L",
     quantite: 1,
     duree: "1 mois",
@@ -1501,7 +1513,7 @@ export const devis: Devis[] = [
     statut: "Accepté",
     lignes: [L("P1", "Mini-pelle 3.5T", 2, 9200, 0, 3, "Semaine")],
     conditions: "Caution 20 000 DH. Livraison et récupération incluses.",
-    commandeId: "CMD-2026-0091",
+    locationId: "LOC-2026-0041",
   },
   {
     id: "DEV-2026-0171",
@@ -1515,7 +1527,7 @@ export const devis: Devis[] = [
     statut: "Accepté",
     lignes: [L("P6", "Échafaudage multidirectionnel 100 m²", 1, 7200, 0, 3, "Mois")],
     conditions: "Montage à la charge du client.",
-    commandeId: "CMD-2026-0088",
+    locationId: "LOC-2026-0038",
   },
   {
     id: "DEV-2026-0184",
@@ -1553,7 +1565,7 @@ export const devis: Devis[] = [
     statut: "Accepté",
     lignes: [L("P4", "Groupe électrogène 60 kVA", 1, 18500, 0, 1, "Mois")],
     conditions: "Carburant à la charge du client.",
-    commandeId: "CMD-2026-0084",
+    locationId: "LOC-2026-0035",
   },
   {
     id: "DEV-2026-0161",
@@ -1578,7 +1590,7 @@ export const devis: Devis[] = [
     statut: "Accepté",
     lignes: [L("P1", "Mini-pelle 3.5T", 1, 32000, 0, 1, "Mois")],
     conditions: "Caution 15 000 DH.",
-    commandeId: "CMD-2026-0079",
+    locationId: "LOC-2026-0031",
   },
   {
     id: "DEV-2026-0165",
@@ -1594,167 +1606,64 @@ export const devis: Devis[] = [
   },
 ];
 
-export const commandes: Commande[] = [
-  {
-    id: "CMD-2026-0091",
-    clientId: "CLI-001",
-    devisId: "DEV-2026-0175",
-    type: "Location",
-    date: "2026-09-03",
-    montant: 87500,
-    statut: "En livraison",
-    paiement: "Acompte",
-    livraisonId: "LIV-2026-0063",
-    factureId: "FAC-2026-0098",
-    locationId: "LOC-2026-0041",
-    lignes: [L("P1", "Mini-pelle 3.5T", 2, 9200, 0, 3, "Semaine")],
-    notes: "Livraison sur chantier Gzenaya, contact sur place M. Alaoui.",
-    responsableId: "U1",
-  },
-  {
-    id: "CMD-2026-0088",
-    clientId: "CLI-005",
-    devisId: "DEV-2026-0171",
-    type: "Location",
-    date: "2026-08-30",
-    montant: 21600,
-    statut: "Livrée",
-    paiement: "Payé",
-    livraisonId: "LIV-2026-0059",
-    factureId: "FAC-2026-0094",
-    locationId: "LOC-2026-0038",
-    lignes: [L("P6", "Échafaudage multidirectionnel 100 m²", 1, 7200, 0, 3, "Mois")],
-    notes: "",
-    responsableId: "U6",
-  },
-  {
-    id: "CMD-2026-0084",
-    clientId: "CLI-004",
-    devisId: "DEV-2026-0168",
-    type: "Location",
-    date: "2026-08-27",
-    montant: 18500,
-    statut: "Livrée",
-    paiement: "Partiellement payé",
-    livraisonId: "LIV-2026-0055",
-    factureId: "FAC-2026-0090",
-    locationId: "LOC-2026-0035",
-    lignes: [L("P4", "Groupe électrogène 60 kVA", 1, 18500, 0, 1, "Mois")],
-    notes: "",
-    responsableId: "U1",
-  },
-  {
-    id: "CMD-2026-0079",
-    clientId: "CLI-002",
-    devisId: "DEV-2026-0157",
-    type: "Location",
-    date: "2026-08-18",
-    montant: 32000,
-    statut: "Terminée",
-    paiement: "Payé",
-    livraisonId: "LIV-2026-0051",
-    factureId: "FAC-2026-0086",
-    locationId: "LOC-2026-0031",
-    lignes: [L("P1", "Mini-pelle 3.5T", 1, 32000, 0, 1, "Mois")],
-    notes: "",
-    responsableId: "U1",
-  },
-  {
-    id: "CMD-2026-0092",
-    clientId: "CLI-003",
-    type: "Vente",
-    date: "2026-09-05",
-    montant: 47400,
-    statut: "À préparer",
-    paiement: "Non payé",
-    factureId: "FAC-2026-0099",
-    venteId: "VTE-2026-0089",
-    lignes: [L("P8", "Scie circulaire professionnelle", 6, 7900, 0)],
-    notes: "Client souhaite un retrait entrepôt Tanger.",
-    responsableId: "U6",
-  },
-  {
-    id: "CMD-2026-0090",
-    clientId: "CLI-007",
-    type: "Vente",
-    date: "2026-09-02",
-    montant: 87500,
-    statut: "Confirmée",
-    paiement: "Acompte",
-    factureId: "FAC-2026-0097",
-    venteId: "VTE-2026-0087",
-    lignes: [L("P5", "Compacteur à plaque réversible", 2, 46500, 6)],
-    notes: "",
-    responsableId: "U1",
-  },
-  {
-    id: "CMD-2026-0093",
-    clientId: "CLI-006",
-    type: "Vente",
-    date: "2026-09-06",
-    montant: 24800,
-    statut: "À confirmer",
-    paiement: "Non payé",
-    lignes: [L("P3", "Bétonnière 350 L", 1, 24800, 0)],
-    notes: "En attente de bon de commande signé.",
-    responsableId: "U1",
-  },
-  {
-    id: "CMD-2026-0086",
-    clientId: "CLI-001",
-    type: "Vente",
-    date: "2026-08-28",
-    montant: 39500,
-    statut: "Terminée",
-    paiement: "Payé",
-    livraisonId: "LIV-2026-0057",
-    factureId: "FAC-2026-0092",
-    venteId: "VTE-2026-0083",
-    lignes: [L("P9", "Plaque vibrante 90 kg", 2, 21500, 8)],
-    notes: "",
-    responsableId: "U1",
-  },
-];
-
 export const ventes: Vente[] = [
   {
     id: "VTE-2026-0087",
-    commandeId: "CMD-2026-0090",
+    devisId: undefined,
     clientId: "CLI-007",
     date: "2026-09-02",
     montant: 87500,
     statut: "Confirmée",
+    paiement: "Acompte",
+    lignes: [L("P5", "Compacteur à plaque réversible", 2, 46500, 6)],
+    factureId: "FAC-2026-0097",
+    notes: "",
+    responsableId: "U1",
   },
   {
     id: "VTE-2026-0089",
-    commandeId: "CMD-2026-0092",
     clientId: "CLI-003",
     date: "2026-09-05",
     montant: 47400,
     statut: "En préparation",
+    paiement: "Non payé",
+    lignes: [L("P8", "Scie circulaire professionnelle", 6, 7900, 0)],
+    factureId: "FAC-2026-0099",
+    livraisonId: "LIV-2026-0064",
+    notes: "Client souhaite un retrait entrepôt Tanger.",
+    responsableId: "U6",
+  },
+  {
+    id: "VTE-2026-0090",
+    clientId: "CLI-006",
+    date: "2026-09-06",
+    montant: 24800,
+    statut: "Brouillon",
+    paiement: "Non payé",
+    lignes: [L("P3", "Bétonnière 350 L", 1, 24800, 0)],
+    factureId: "FAC-2026-0100",
+    notes: "En attente de validation commerciale.",
+    responsableId: "U1",
   },
   {
     id: "VTE-2026-0083",
-    commandeId: "CMD-2026-0086",
     clientId: "CLI-001",
     date: "2026-08-28",
     montant: 39500,
     statut: "Livrée",
-  },
-  {
-    id: "VTE-2026-0080",
-    commandeId: "CMD-2026-0079",
-    clientId: "CLI-002",
-    date: "2026-08-18",
-    montant: 32000,
-    statut: "Payée",
+    paiement: "Payé",
+    lignes: [L("P9", "Plaque vibrante 90 kg", 2, 21500, 8)],
+    factureId: "FAC-2026-0092",
+    livraisonId: "LIV-2026-0057",
+    notes: "",
+    responsableId: "U1",
   },
 ];
 
 export const locations: Location[] = [
   {
     id: "LOC-2026-0041",
-    commandeId: "CMD-2026-0091",
+    devisId: "DEV-2026-0175",
     clientId: "CLI-001",
     produitId: "P1",
     quantite: 2,
@@ -1767,10 +1676,15 @@ export const locations: Location[] = [
     ville: "Tanger",
     responsableChantier: "Rachid Alaoui",
     telephoneChantier: "+212 661 24 87 10",
+    paiement: "Acompte",
+    factureId: "FAC-2026-0098",
+    livraisonId: "LIV-2026-0063",
+    notes: "Livraison sur chantier Gzenaya, contact sur place M. Alaoui.",
+    responsableId: "U1",
   },
   {
     id: "LOC-2026-0038",
-    commandeId: "CMD-2026-0088",
+    devisId: "DEV-2026-0171",
     clientId: "CLI-005",
     produitId: "P6",
     quantite: 1,
@@ -1783,10 +1697,15 @@ export const locations: Location[] = [
     ville: "Rabat",
     responsableChantier: "Sanaa El Khattabi",
     telephoneChantier: "+212 665 32 76 18",
+    paiement: "Payé",
+    factureId: "FAC-2026-0094",
+    livraisonId: "LIV-2026-0059",
+    notes: "",
+    responsableId: "U6",
   },
   {
     id: "LOC-2026-0035",
-    commandeId: "CMD-2026-0084",
+    devisId: "DEV-2026-0168",
     clientId: "CLI-004",
     produitId: "P4",
     quantite: 1,
@@ -1800,10 +1719,15 @@ export const locations: Location[] = [
     responsableChantier: "Hamza Tazi",
     telephoneChantier: "+212 664 11 90 33",
     retourId: "RET-2026-0022",
+    paiement: "Partiellement payé",
+    factureId: "FAC-2026-0090",
+    livraisonId: "LIV-2026-0055",
+    notes: "",
+    responsableId: "U1",
   },
   {
     id: "LOC-2026-0031",
-    commandeId: "CMD-2026-0079",
+    devisId: "DEV-2026-0157",
     clientId: "CLI-002",
     produitId: "P1",
     quantite: 1,
@@ -1817,10 +1741,14 @@ export const locations: Location[] = [
     responsableChantier: "Meriem Fassi",
     telephoneChantier: "+212 662 55 41 09",
     retourId: "RET-2026-0021",
+    paiement: "Payé",
+    factureId: "FAC-2026-0086",
+    livraisonId: "LIV-2026-0051",
+    notes: "",
+    responsableId: "U1",
   },
   {
     id: "LOC-2026-0029",
-    commandeId: "CMD-2026-0079",
     clientId: "CLI-007",
     produitId: "P2",
     quantite: 3,
@@ -1833,10 +1761,12 @@ export const locations: Location[] = [
     ville: "Kénitra",
     responsableChantier: "Imane Lahlou",
     telephoneChantier: "+212 667 85 60 27",
+    paiement: "Payé",
+    notes: "",
+    responsableId: "U6",
   },
   {
     id: "LOC-2026-0026",
-    commandeId: "CMD-2026-0084",
     clientId: "CLI-003",
     produitId: "P7",
     quantite: 1,
@@ -1850,10 +1780,12 @@ export const locations: Location[] = [
     responsableChantier: "Youssef Benjelloun",
     telephoneChantier: "+212 663 78 22 45",
     retourId: "RET-2026-0023",
+    paiement: "Acompte",
+    notes: "",
+    responsableId: "U1",
   },
   {
     id: "LOC-2026-0018",
-    commandeId: "CMD-2026-0079",
     clientId: "CLI-006",
     produitId: "P3",
     quantite: 2,
@@ -1867,6 +1799,9 @@ export const locations: Location[] = [
     responsableChantier: "Mehdi Sbaï",
     telephoneChantier: "+212 666 47 03 92",
     retourId: "RET-2026-0017",
+    paiement: "Payé",
+    notes: "",
+    responsableId: "U1",
   },
 ];
 
@@ -1874,7 +1809,9 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0098",
     clientId: "CLI-001",
-    commandeId: "CMD-2026-0091",
+    origineType: "Location",
+    origineId: "LOC-2026-0041",
+    devisId: "DEV-2026-0175",
     date: "2026-08-28",
     echeance: "2026-09-02",
     ht: 72917,
@@ -1885,7 +1822,8 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0097",
     clientId: "CLI-007",
-    commandeId: "CMD-2026-0090",
+    origineType: "Vente",
+    origineId: "VTE-2026-0087",
     date: "2026-09-02",
     echeance: "2026-10-02",
     ht: 72917,
@@ -1896,7 +1834,8 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0099",
     clientId: "CLI-003",
-    commandeId: "CMD-2026-0092",
+    origineType: "Vente",
+    origineId: "VTE-2026-0089",
     date: "2026-09-05",
     echeance: "2026-10-05",
     ht: 39500,
@@ -1907,7 +1846,9 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0094",
     clientId: "CLI-005",
-    commandeId: "CMD-2026-0088",
+    origineType: "Location",
+    origineId: "LOC-2026-0038",
+    devisId: "DEV-2026-0171",
     date: "2026-08-30",
     echeance: "2026-09-29",
     ht: 18000,
@@ -1918,7 +1859,8 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0092",
     clientId: "CLI-001",
-    commandeId: "CMD-2026-0086",
+    origineType: "Vente",
+    origineId: "VTE-2026-0083",
     date: "2026-08-28",
     echeance: "2026-09-27",
     ht: 32917,
@@ -1929,7 +1871,9 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0090",
     clientId: "CLI-004",
-    commandeId: "CMD-2026-0084",
+    origineType: "Location",
+    origineId: "LOC-2026-0035",
+    devisId: "DEV-2026-0168",
     date: "2026-08-27",
     echeance: "2026-09-26",
     ht: 15417,
@@ -1940,7 +1884,9 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0086",
     clientId: "CLI-002",
-    commandeId: "CMD-2026-0079",
+    origineType: "Location",
+    origineId: "LOC-2026-0031",
+    devisId: "DEV-2026-0157",
     date: "2026-08-18",
     echeance: "2026-09-17",
     ht: 26667,
@@ -1951,7 +1897,8 @@ export const factures: Facture[] = [
   {
     id: "FAC-2026-0100",
     clientId: "CLI-006",
-    commandeId: "CMD-2026-0093",
+    origineType: "Vente",
+    origineId: "VTE-2026-0090",
     date: "2026-09-06",
     echeance: "2026-10-06",
     ht: 20667,
@@ -1966,7 +1913,6 @@ export const paiements: Paiement[] = [
     id: "PAY-2026-0142",
     clientId: "CLI-001",
     factureId: "FAC-2026-0098",
-    commandeId: "CMD-2026-0091",
     montant: 55100,
     date: "2026-08-29",
     mode: "Virement",
@@ -1977,18 +1923,16 @@ export const paiements: Paiement[] = [
     id: "PAY-2026-0139",
     clientId: "CLI-007",
     factureId: "FAC-2026-0097",
-    commandeId: "CMD-2026-0090",
     montant: 63000,
     date: "2026-09-03",
     mode: "Chèque",
     reference: "CHQ-004512",
-    commentaire: "Acompte à la commande",
+    commentaire: "Acompte à la signature",
   },
   {
     id: "PAY-2026-0136",
     clientId: "CLI-005",
     factureId: "FAC-2026-0094",
-    commandeId: "CMD-2026-0088",
     montant: 21600,
     date: "2026-08-31",
     mode: "Virement",
@@ -1999,7 +1943,6 @@ export const paiements: Paiement[] = [
     id: "PAY-2026-0133",
     clientId: "CLI-001",
     factureId: "FAC-2026-0092",
-    commandeId: "CMD-2026-0086",
     montant: 39500,
     date: "2026-08-29",
     mode: "Virement",
@@ -2010,7 +1953,6 @@ export const paiements: Paiement[] = [
     id: "PAY-2026-0130",
     clientId: "CLI-004",
     factureId: "FAC-2026-0090",
-    commandeId: "CMD-2026-0084",
     montant: 5700,
     date: "2026-08-28",
     mode: "Espèces",
@@ -2021,7 +1963,6 @@ export const paiements: Paiement[] = [
     id: "PAY-2026-0126",
     clientId: "CLI-002",
     factureId: "FAC-2026-0086",
-    commandeId: "CMD-2026-0079",
     montant: 32000,
     date: "2026-08-20",
     mode: "Carte",
@@ -2033,7 +1974,8 @@ export const paiements: Paiement[] = [
 export const livraisons: Livraison[] = [
   {
     id: "LIV-2026-0063",
-    commandeId: "CMD-2026-0091",
+    origineType: "Location",
+    origineId: "LOC-2026-0041",
     clientId: "CLI-001",
     chantier: "Plateforme logistique Gzenaya",
     ville: "Tanger",
@@ -2048,7 +1990,8 @@ export const livraisons: Livraison[] = [
   },
   {
     id: "LIV-2026-0064",
-    commandeId: "CMD-2026-0092",
+    origineType: "Vente",
+    origineId: "VTE-2026-0089",
     clientId: "CLI-003",
     chantier: "Dépôt Tanger Travaux",
     ville: "Tanger",
@@ -2063,58 +2006,46 @@ export const livraisons: Livraison[] = [
   },
   {
     id: "LIV-2026-0065",
-    commandeId: "CMD-2026-0090",
+    origineType: "Vente",
+    origineId: "VTE-2026-0087",
     clientId: "CLI-007",
-    chantier: "Zone Franche Kénitra, Bloc C",
+    chantier: "Chantier Zone Franche Kénitra",
     ville: "Kénitra",
-    adresse: "Zone Franche, Bloc C",
-    date: "2026-09-07",
+    adresse: "Zone Franche, Îlot 12",
+    date: "2026-09-09",
     creneau: "09:00 – 12:00",
-    responsableId: "U3",
-    chauffeur: "Nabil Ait Ali",
-    vehicule: "Plateau — 30987-C-3",
-    statut: "Planifiée",
-    notes: "Prévoir sangles supplémentaires.",
-  },
-  {
-    id: "LIV-2026-0066",
-    commandeId: "CMD-2026-0093",
-    clientId: "CLI-006",
-    chantier: "Résidence Sidi Ghanem",
-    ville: "Marrakech",
-    adresse: "Sidi Ghanem, Rue 12",
-    date: "2026-09-08",
-    creneau: "10:00 – 13:00",
     responsableId: "U3",
     chauffeur: "—",
     vehicule: "—",
     statut: "À préparer",
-    notes: "En attente de confirmation de commande.",
+    notes: "Prévoir sangles supplémentaires.",
   },
   {
     id: "LIV-2026-0059",
-    commandeId: "CMD-2026-0088",
+    origineType: "Location",
+    origineId: "LOC-2026-0038",
     clientId: "CLI-005",
     chantier: "Immeuble Takadoum",
     ville: "Rabat",
-    adresse: "Quartier Industriel Takadoum, Lot 17",
+    adresse: "Avenue Hassan II, Takadoum",
     date: "2026-09-01",
-    creneau: "08:00 – 10:00",
+    creneau: "07:30 – 10:00",
     responsableId: "U3",
-    chauffeur: "Abdellah Moutaouakil",
-    vehicule: "Plateau — 30987-C-3",
+    chauffeur: "Mustapha Regragui",
+    vehicule: "Plateau — 32118-C-5",
     statut: "Livrée",
     notes: "",
   },
   {
     id: "LIV-2026-0057",
-    commandeId: "CMD-2026-0086",
+    origineType: "Vente",
+    origineId: "VTE-2026-0083",
     clientId: "CLI-001",
-    chantier: "Chantier Gzenaya",
+    chantier: "Entrepôt Gzenaya",
     ville: "Tanger",
     adresse: "Zone Industrielle Gzenaya, Lot 42",
     date: "2026-08-29",
-    creneau: "13:00 – 15:00",
+    creneau: "10:00 – 12:00",
     responsableId: "U3",
     chauffeur: "Said Bouhali",
     vehicule: "Fourgon — 44210-B-1",
@@ -2123,22 +2054,24 @@ export const livraisons: Livraison[] = [
   },
   {
     id: "LIV-2026-0055",
-    commandeId: "CMD-2026-0084",
+    origineType: "Location",
+    origineId: "LOC-2026-0035",
     clientId: "CLI-004",
     chantier: "Base vie Martil",
     ville: "Tétouan",
-    adresse: "Av. Mohammed V, Résidence Al Wafa",
+    adresse: "Route de Martil, Km 4",
     date: "2026-08-28",
-    creneau: "09:00 – 11:00",
+    creneau: "08:00 – 11:00",
     responsableId: "U3",
-    chauffeur: "Nabil Ait Ali",
+    chauffeur: "Abdellah Moutaouakil",
     vehicule: "Porte-engins — 12345-A-6",
     statut: "Livrée",
     notes: "",
   },
   {
     id: "LIV-2026-0051",
-    commandeId: "CMD-2026-0079",
+    origineType: "Location",
+    origineId: "LOC-2026-0031",
     clientId: "CLI-002",
     chantier: "Voirie Aïn Sebaâ",
     ville: "Casablanca",
@@ -2294,4 +2227,326 @@ export const notificationsSeed = [
     date: "Hier",
     lien: "/devis/DEV-2026-0175",
   },
+];
+
+/* ------------------------------------------------------------------ */
+/* Conversations client (Agent IA — Telegram / WhatsApp)               */
+/* ------------------------------------------------------------------ */
+
+export type Canal = "Telegram" | "WhatsApp";
+export type Langue = "Français" | "Darija" | "العربية" | "English";
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  emetteur: "Client" | "IA";
+  contenu: string;
+  traduction?: string | undefined;
+  langue: Langue;
+  horodatage: string;
+}
+
+export interface Conversation {
+  id: string;
+  prospectId: string;
+  clientId?: string | undefined;
+  canal: Canal;
+  langue: Langue;
+  debutLe: string;
+  dernierMessageLe: string;
+  statut: "Qualification en cours" | "Qualifié" | "En attente client" | "Clôturée";
+  agent: string;
+  confiance: number;
+  resume: string;
+  extraction: { label: string; valeur: string }[];
+  regles: { label: string; valeur: string }[];
+  opportuniteId?: string | undefined;
+}
+
+const M = (
+  conversationId: string,
+  n: number,
+  emetteur: "Client" | "IA",
+  contenu: string,
+  horodatage: string,
+  langue: Langue = "Français",
+  traduction?: string,
+): Message => ({
+  id: `${conversationId}-M${n}`,
+  conversationId,
+  emetteur,
+  contenu,
+  langue,
+  horodatage,
+  traduction,
+});
+
+export const conversations: Conversation[] = [
+  {
+    id: "CONV-2026-0031",
+    prospectId: "PRO-2026-0118",
+    canal: "Telegram",
+    langue: "Français",
+    debutLe: "2026-09-07T14:22:00",
+    dernierMessageLe: "2026-09-07T14:35:00",
+    statut: "Qualifié",
+    agent: "Agent Commercial IA SINMAT",
+    confiance: 94,
+    resume:
+      "Le client souhaite louer un compacteur réversible pour un chantier à Casablanca à partir du 18 septembre pendant 10 jours.",
+    extraction: [
+      { label: "Type de besoin", valeur: "Location" },
+      { label: "Produit détecté", valeur: "Compacteur à plaque réversible" },
+      { label: "Quantité", valeur: "1" },
+      { label: "Date souhaitée", valeur: "18 sept. 2026" },
+      { label: "Durée", valeur: "10 jours" },
+      { label: "Ville", valeur: "Casablanca" },
+      { label: "Urgence", valeur: "Moyenne" },
+      { label: "Statut", valeur: "Qualifié" },
+    ],
+    regles: [
+      { label: "Produit", valeur: "Compacteur à plaque réversible" },
+      { label: "Tarification", valeur: "Palier 8–15 jours" },
+      { label: "Qualification", valeur: "Conforme" },
+    ],
+    opportuniteId: "OPP-2026-0042",
+  },
+  {
+    id: "CONV-2026-0029",
+    prospectId: "PRO-2026-0121",
+    canal: "WhatsApp",
+    langue: "Darija",
+    debutLe: "2026-09-06T10:04:00",
+    dernierMessageLe: "2026-09-06T10:19:00",
+    statut: "Qualification en cours",
+    agent: "Agent Commercial IA SINMAT",
+    confiance: 82,
+    resume:
+      "Le client cherche à louer une nacelle élévatrice à Tanger pour environ un mois, livraison sur site à confirmer.",
+    extraction: [
+      { label: "Type de besoin", valeur: "Location" },
+      { label: "Produit détecté", valeur: "Nacelle élévatrice 12 m" },
+      { label: "Quantité", valeur: "1" },
+      { label: "Date souhaitée", valeur: "20 sept. 2026" },
+      { label: "Durée", valeur: "1 mois" },
+      { label: "Ville", valeur: "Tanger" },
+      { label: "Urgence", valeur: "Élevée" },
+      { label: "Statut", valeur: "Qualification en cours" },
+    ],
+    regles: [
+      { label: "Produit", valeur: "Nacelle élévatrice 12 m" },
+      { label: "Tarification", valeur: "Palier mensuel" },
+      { label: "Qualification", valeur: "Livraison à confirmer" },
+    ],
+  },
+];
+
+export const messages: Message[] = [
+  M("CONV-2026-0031", 1, "Client", "Bonjour, je cherche un compacteur pour mon chantier.", "2026-09-07T14:22:00"),
+  M("CONV-2026-0031", 2, "IA", "Bonjour 👋 Bien sûr. Vous souhaitez l'acheter ou le louer ?", "2026-09-07T14:23:00"),
+  M("CONV-2026-0031", 3, "Client", "Location.", "2026-09-07T14:24:00"),
+  M("CONV-2026-0031", 4, "IA", "Très bien. Pour combien de jours souhaitez-vous le louer ?", "2026-09-07T14:25:00"),
+  M("CONV-2026-0031", 5, "Client", "10 jours à partir du 18 septembre.", "2026-09-07T14:27:00"),
+  M("CONV-2026-0031", 6, "IA", "Parfait. Sur quelle ville se situe le chantier ?", "2026-09-07T14:28:00"),
+  M("CONV-2026-0031", 7, "Client", "Casablanca, zone Aïn Sebaâ.", "2026-09-07T14:30:00"),
+  M("CONV-2026-0031", 8, "IA", "Merci. Souhaitez-vous une livraison sur chantier ?", "2026-09-07T14:31:00"),
+  M("CONV-2026-0031", 9, "Client", "Oui, livraison sur place.", "2026-09-07T14:33:00"),
+  M(
+    "CONV-2026-0031",
+    10,
+    "IA",
+    "C'est noté. Un compacteur à plaque réversible est disponible du 18 au 28 septembre. Un commercial SINMAT vous transmet le devis aujourd'hui.",
+    "2026-09-07T14:35:00",
+  ),
+  M("CONV-2026-0029", 1, "Client", "Salam, bghit nkri nacelle f Tanger.", "2026-09-06T10:04:00", "Darija", "Bonjour, je souhaite louer une nacelle à Tanger."),
+  M("CONV-2026-0029", 2, "IA", "Salam 👋 Wakha. Ch'hal men youm bghitiha ?", "2026-09-06T10:06:00", "Darija", "Bonjour. D'accord. Pour combien de jours la souhaitez-vous ?"),
+  M("CONV-2026-0029", 3, "Client", "Chi chher, mn 20 septembre.", "2026-09-06T10:09:00", "Darija", "Environ un mois, à partir du 20 septembre."),
+  M("CONV-2026-0029", 4, "IA", "Mezyan. Ch'hal d'l'irtifa3 li khassek ? 12 m ola ktar ?", "2026-09-06T10:12:00", "Darija", "Très bien. Quelle hauteur vous faut-il ? 12 m ou plus ?"),
+  M("CONV-2026-0029", 5, "Client", "12 m kafi.", "2026-09-06T10:15:00", "Darija", "12 m suffisent."),
+  M("CONV-2026-0029", 6, "IA", "Wakha. Wach bghiti livraison f chantier ?", "2026-09-06T10:19:00", "Darija", "D'accord. Souhaitez-vous une livraison sur chantier ?"),
+];
+
+export const messagesDe = (conversationId: string) =>
+  messages.filter((m) => m.conversationId === conversationId);
+
+export const conversationDuProspect = (prospectId: string) =>
+  conversations.find((c) => c.prospectId === prospectId);
+
+/* ------------------------------------------------------------------ */
+/* Règles de qualification / tarification par produit                  */
+/* ------------------------------------------------------------------ */
+
+export type UniteTarif = "Jour" | "Semaine" | "Mois" | "Forfait";
+
+export interface PalierLocation {
+  id: string;
+  minJours: number;
+  maxJours: number | null;
+  prix: number;
+  unite: UniteTarif;
+}
+
+export interface PalierVente {
+  id: string;
+  minQte: number;
+  maxQte: number | null;
+  prix: number;
+}
+
+export type NiveauCritere = "Requis" | "Optionnel" | "Non demandé";
+
+export interface RegleProduit {
+  produitId: string;
+  actif: boolean;
+  venteActive: boolean;
+  locationActive: boolean;
+  quantiteMin: number;
+  quantiteMax: number;
+  validationManuelle: boolean;
+  infosClientRequises: string[];
+  /* Location */
+  dureeMin: number;
+  dureeMax: number;
+  caution: number;
+  cautionObligatoire: boolean;
+  livraison: "Optionnelle" | "Obligatoire" | "Indisponible";
+  retardParJour: number;
+  weekend: "Inclus" | "Exclu" | "Personnalisé";
+  prolongation: boolean;
+  approbationApresJours: number;
+  montantAutoMax: number;
+  paliersLocation: PalierLocation[];
+  /* Vente */
+  paliersVente: PalierVente[];
+  devisAutoVente: boolean;
+  approbationVenteAuDessus: number;
+  /* Qualification IA */
+  criteres: { cle: string; label: string; niveau: NiveauCritere }[];
+  actionsAutomatiques: {
+    qualifierProspect: boolean;
+    creerOpportunite: boolean;
+    calculerMontant: boolean;
+    preparerDevis: boolean;
+  };
+  modifieLe: string;
+}
+
+const CRITERES_DEFAUT = (): RegleProduit["criteres"] => [
+  { cle: "produit", label: "Produit identifié", niveau: "Requis" },
+  { cle: "quantite", label: "Quantité identifiée", niveau: "Requis" },
+  { cle: "date", label: "Date de début", niveau: "Requis" },
+  { cle: "duree", label: "Durée", niveau: "Requis" },
+  { cle: "ville", label: "Ville", niveau: "Requis" },
+  { cle: "chantier", label: "Chantier", niveau: "Optionnel" },
+  { cle: "livraison", label: "Besoin de livraison", niveau: "Optionnel" },
+  { cle: "identite", label: "Identité du client", niveau: "Requis" },
+];
+
+const regleDefaut = (p: Produit, modifieLe: string): RegleProduit => ({
+  produitId: p.id,
+  actif: true,
+  venteActive: true,
+  locationActive: true,
+  quantiteMin: 1,
+  quantiteMax: Math.max(1, p.stock),
+  validationManuelle: false,
+  infosClientRequises: ["Raison sociale", "Téléphone", "Ville"],
+  dureeMin: 1,
+  dureeMax: 180,
+  caution: 0,
+  cautionObligatoire: false,
+  livraison: "Optionnelle",
+  retardParJour: Math.round(p.prixJour * 0.5),
+  weekend: "Inclus",
+  prolongation: true,
+  approbationApresJours: 30,
+  montantAutoMax: 150000,
+  paliersLocation: [
+    { id: `${p.id}-T1`, minJours: 1, maxJours: 3, prix: p.prixJour, unite: "Jour" },
+    { id: `${p.id}-T2`, minJours: 4, maxJours: 7, prix: Math.round(p.prixJour * 0.92), unite: "Jour" },
+    { id: `${p.id}-T3`, minJours: 8, maxJours: 15, prix: Math.round(p.prixJour * 0.85), unite: "Jour" },
+    { id: `${p.id}-T4`, minJours: 16, maxJours: 30, prix: Math.round(p.prixJour * 0.78), unite: "Jour" },
+    { id: `${p.id}-T5`, minJours: 31, maxJours: null, prix: Math.round(p.prixJour * 0.7), unite: "Jour" },
+  ],
+  paliersVente: [
+    { id: `${p.id}-V1`, minQte: 1, maxQte: 2, prix: p.prixVente },
+    { id: `${p.id}-V2`, minQte: 3, maxQte: 5, prix: Math.round(p.prixVente * 0.95) },
+    { id: `${p.id}-V3`, minQte: 6, maxQte: null, prix: Math.round(p.prixVente * 0.9) },
+  ],
+  devisAutoVente: true,
+  approbationVenteAuDessus: 200000,
+  criteres: CRITERES_DEFAUT(),
+  actionsAutomatiques: {
+    qualifierProspect: true,
+    creerOpportunite: true,
+    calculerMontant: true,
+    preparerDevis: false,
+  },
+  modifieLe,
+});
+
+export const reglesProduits: RegleProduit[] = produits.map((p, i) =>
+  regleDefaut(p, i % 3 === 0 ? "2026-09-07" : i % 3 === 1 ? "2026-09-02" : "2026-08-24"),
+);
+
+export const regleVide = (produitId: string): RegleProduit => {
+  const p = produits.find((x) => x.id === produitId);
+  return p
+    ? regleDefaut(p, "2026-09-07")
+    : { ...regleDefaut(produits[0]!, "2026-09-07"), produitId };
+};
+
+/** Palier de location applicable pour une durée en jours. */
+export const palierPourDuree = (paliers: PalierLocation[], jours: number) =>
+  paliers.find((t) => jours >= t.minJours && (t.maxJours === null || jours <= t.maxJours));
+
+export const libellePalier = (t: PalierLocation) =>
+  t.maxJours === null ? `+${t.minJours - 1} jours` : `${t.minJours} à ${t.maxJours} jours`;
+
+export const palierVentePourQte = (paliers: PalierVente[], qte: number) =>
+  paliers.find((t) => qte >= t.minQte && (t.maxQte === null || qte <= t.maxQte));
+
+/** Calcule un montant de location HT selon les paliers configurés. */
+export const calculerLocation = (
+  paliers: PalierLocation[],
+  jours: number,
+  quantite: number,
+) => {
+  const palier = palierPourDuree(paliers, jours);
+  if (!palier) return { palier: undefined, prixUnitaire: 0, total: 0 };
+  const facteur =
+    palier.unite === "Jour"
+      ? jours
+      : palier.unite === "Semaine"
+        ? Math.ceil(jours / 7)
+        : palier.unite === "Mois"
+          ? Math.ceil(jours / 30)
+          : 1;
+  return {
+    palier,
+    prixUnitaire: palier.prix,
+    total: Math.round(palier.prix * facteur * quantite),
+  };
+};
+
+/* ------------------------------------------------------------------ */
+/* Journal d'audit (IA / humain)                                       */
+/* ------------------------------------------------------------------ */
+
+export interface EvenementAudit {
+  id: string;
+  cible: string;
+  date: string;
+  action: string;
+  acteur: string;
+  mode: "IA" | "Manuel";
+  detail?: string | undefined;
+}
+
+export const auditSeed: EvenementAudit[] = [
+  { id: "A1", cible: "OPP-2026-0042", date: "2026-09-07T14:32:00", action: "Prospect qualifié", acteur: "Agent IA", mode: "IA" },
+  { id: "A2", cible: "OPP-2026-0042", date: "2026-09-07T14:34:00", action: "Opportunité créée", acteur: "Agent IA", mode: "IA", detail: "À partir de la conversation Telegram" },
+  { id: "A3", cible: "OPP-2026-0042", date: "2026-09-07T15:12:00", action: "Devis généré", acteur: "FatimaEzzahra Seffari", mode: "Manuel" },
+  { id: "A4", cible: "OPP-2026-0042", date: "2026-09-07T15:15:00", action: "Devis envoyé", acteur: "Agent IA", mode: "IA" },
+  { id: "A5", cible: "OPP-2026-0042", date: "2026-09-08T09:04:00", action: "Devis accepté", acteur: "Agent IA", mode: "IA", detail: "Détection dans la conversation" },
 ];

@@ -38,7 +38,6 @@ function FicheLocation() {
 
   const client = s.clients.find((c) => c.id === location.clientId);
   const produit = produits.find((p) => p.id === location.produitId);
-  const commande = s.commandes.find((c) => c.id === location.commandeId);
   const retour = s.retours.find((r) => r.id === location.retourId);
 
   const clore = () => {
@@ -64,9 +63,9 @@ function FicheLocation() {
         sousTitre={`${client?.nom ?? "—"} · ${produit?.nom ?? "—"} · ${location.ville}`}
         actions={
           <>
-            {commande && (
-              <Lien to={`/commandes/${commande.id}`}>
-                <Button variant="outline" size="sm">Voir la commande</Button>
+            {location.devisId && (
+              <Lien to={`/devis/${location.devisId}`}>
+                <Button variant="outline" size="sm">Voir le devis</Button>
               </Lien>
             )}
             {location.statut !== "Terminée" && (
@@ -161,7 +160,7 @@ function FicheLocation() {
           <Panneau titre="Documents liés">
             <DocumentsLies
               elements={[
-                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
+                ...(location.devisId ? [{ label: "Devis", ref: location.devisId, to: `/devis/${location.devisId}` }] : []),
                 ...(retour ? [{ label: "Retour", ref: retour.id, to: `/retours/${retour.id}` }] : []),
               ]}
             />

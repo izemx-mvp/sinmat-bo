@@ -33,6 +33,7 @@ import { useSinmat } from "@/data/store";
 import {
   ETAPES_PIPELINE,
   formatDH,
+  formatDate,
   formatNombre,
   prenomUtilisateur,
   seriePerformance,
@@ -63,7 +64,7 @@ const PERIODES = ["Aujourd'hui", "Cette semaine", "Ce mois", "Ce trimestre"];
 const PERIODES_GRAPHE = ["7 jours", "30 jours", "3 mois", "12 mois"];
 
 function VueDEnsemble() {
-  const { opportunites, devis, commandes, factures, locations, livraisons, clients } = useSinmat();
+  const { opportunites, devis, ventes, locations, factures, livraisons, clients } = useSinmat();
   const [periode, setPeriode] = useState(PERIODES[2]!);
   const [periodeGraphe, setPeriodeGraphe] = useState(PERIODES_GRAPHE[0]!);
 
@@ -427,27 +428,33 @@ function VueDEnsemble() {
         </Panneau>
       </div>
 
-      <Panneau titre="Dernières commandes" description="Suivi opérationnel" bodyClassName="p-0">
+      <Panneau titre="Dernières opérations" description="Ventes et locations récentes" bodyClassName="p-0">
         <Tableau
-          colonnes={["Commande", "Client", "Type", "Montant", "Paiement", "Statut", "Date"]}
+          colonnes={["Référence", "Client", "Type", "Montant", "Paiement", "Statut", "Date"]}
         >
-          {commandes.slice(0, 6).map((c) => (
-            <Ligne key={c.id} to={`/commandes/${c.id}`}>
-              <Cellule className="num font-semibold">{c.id}</Cellule>
-              <Cellule>{nomClient(c.clientId)}</Cellule>
-              <Cellule>
-                <Statut valeur={c.type} />
-              </Cellule>
-              <Cellule num>{formatDH(c.montant)}</Cellule>
-              <Cellule>
-                <Statut valeur={c.paiement} />
-              </Cellule>
-              <Cellule>
-                <Statut valeur={c.statut} />
-              </Cellule>
-              <Cellule className="text-muted-foreground">{c.date}</Cellule>
-            </Ligne>
-          ))}
+          {[
+            ...ventes.map((v) => ({ id: v.id, clientId: v.clientId, type: "Vente", montant: v.montant, paiement: v.paiement, statut: v.statut, date: v.date, to: `/ventes/${v.id}` })),
+            ...locations.map((l) => ({ id: l.id, clientId: l.clientId, type: "Location", montant: l.montant, paiement: l.paiement, statut: l.statut, date: l.debut, to: `/locations/${l.id}` })),
+          ]
+            .sort((a, b) => (a.date < b.date ? 1 : -1))
+            .slice(0, 6)
+            .map((o) => (
+              <Ligne key={o.id} to={o.to}>
+                <Cellule className="num font-semibold">{o.id}</Cellule>
+                <Cellule>{nomClient(o.clientId)}</Cellule>
+                <Cellule>
+                  <Statut valeur={o.type} />
+                </Cellule>
+                <Cellule num>{formatDH(o.montant)}</Cellule>
+                <Cellule>
+                  <Statut valeur={o.paiement} />
+                </Cellule>
+                <Cellule>
+                  <Statut valeur={o.statut} />
+                </Cellule>
+                <Cellule className="text-muted-foreground">{formatDate(o.date)}</Cellule>
+              </Ligne>
+            ))}
         </Tableau>
       </Panneau>
     </div>
