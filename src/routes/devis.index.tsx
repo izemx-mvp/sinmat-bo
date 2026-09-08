@@ -104,7 +104,7 @@ function PageDevis() {
               "Statut",
               "Date",
               "Expiration",
-              "Commande",
+              "Document lié",
             ]}
           >
             {filtres.map((d) => {

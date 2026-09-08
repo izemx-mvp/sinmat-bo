@@ -178,8 +178,29 @@ export interface Produit {
   maintenance: number;
   fournisseur: string;
   disponibilite: "Disponible" | "Stock faible" | "Indisponible";
-  specs: { label: string; valeur: string }[];
+  specs: { label: string; valeur: string; unite?: string | undefined }[];
+  /* Champs étendus (création / fiche produit) */
+  sousCategorie?: string | undefined;
+  marque?: string | undefined;
+  images?: string[] | undefined;
+  venteActive?: boolean | undefined;
+  locationActive?: boolean | undefined;
+  uniteLocation?: ("Jour" | "Semaine" | "Mois") | undefined;
+  tva?: number | undefined;
+  prixMinimum?: number | undefined;
+  remiseMax?: number | undefined;
+  poids?: number | undefined;
+  longueur?: number | undefined;
+  largeur?: number | undefined;
+  hauteur?: number | undefined;
+  livrable?: boolean | undefined;
+  infosLogistiques?: string | undefined;
+  qualificationIA?: boolean | undefined;
+  archive?: boolean | undefined;
+  creeLe?: string | undefined;
+  modifieLe?: string | undefined;
 }
+
 
 export interface LigneDocument {
   produitId: string;
@@ -201,7 +222,7 @@ export interface Devis {
   expiration: string;
   montant: number;
   responsableId: string;
-  statut: "Brouillon" | "Envoyé" | "En attente" | "Accepté" | "Refusé" | "Expiré";
+  statut: "Brouillon" | "Généré" | "Envoyé" | "En attente" | "Accepté" | "Refusé" | "Expiré";
   lignes: LigneDocument[];
   conditions: string;
   venteId?: string | undefined;
@@ -2427,9 +2448,14 @@ export interface RegleProduit {
     creerOpportunite: boolean;
     calculerMontant: boolean;
     preparerDevis: boolean;
+    affecterCommercial?: boolean | undefined;
   };
+  commercialId?: string | undefined;
+  /* Date du dernier enregistrement explicite par un utilisateur */
+  configureLe?: string | undefined;
   modifieLe: string;
 }
+
 
 const CRITERES_DEFAUT = (): RegleProduit["criteres"] => [
   { cle: "produit", label: "Produit identifié", niveau: "Requis" },
@@ -2442,7 +2468,7 @@ const CRITERES_DEFAUT = (): RegleProduit["criteres"] => [
   { cle: "identite", label: "Identité du client", niveau: "Requis" },
 ];
 
-const regleDefaut = (p: Produit, modifieLe: string): RegleProduit => ({
+export const regleDefaut = (p: Produit, modifieLe: string): RegleProduit => ({
   produitId: p.id,
   actif: true,
   venteActive: true,
@@ -2481,7 +2507,10 @@ const regleDefaut = (p: Produit, modifieLe: string): RegleProduit => ({
     creerOpportunite: true,
     calculerMontant: true,
     preparerDevis: false,
+    affecterCommercial: false,
   },
+  commercialId: "U1",
+
   modifieLe,
 });
 

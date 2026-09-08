@@ -95,8 +95,9 @@ function PageQualification() {
   return (
     <div className="space-y-5 p-6">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi libelle="Règles configurées" valeur={String(regles.length)} ton="accent" icone={Sparkles} />
+        <Kpi libelle="Produits paramétrés" valeur={String(regles.filter((r) => r.configureLe).length)} ton="accent" icone={Sparkles} />
         <Kpi libelle="Règles actives" valeur={String(regles.filter((r) => r.actif).length)} ton="succes" />
+
         <Kpi
           libelle="Qualification automatique"
           valeur={String(regles.filter((r) => r.actionsAutomatiques.qualifierProspect).length)}
@@ -207,13 +208,19 @@ function PageQualification() {
           </div>
         ) : (
           <Tableau
-            colonnes={["Matériel", "Vente", "Location", "Quantité", "Durée", "Validation", "Modifiée le", "État"]}
+            colonnes={["Matériel", "Configuration", "Vente", "Location", "Quantité", "Durée", "Validation", "Modifiée le", "État"]}
           >
             {filtres.map((r) => (
               <Ligne key={r.produitId} to={`/qualification/${r.produitId}`}>
                 <Cellule className="max-w-[280px]">
                   <span className="block truncate font-semibold text-foreground">{nomProduit(r.produitId)}</span>
                   <span className="block text-[11.5px] text-muted-foreground">{r.produitId}</span>
+                </Cellule>
+                <Cellule>
+                  <Statut
+                    valeur={r.configureLe ? "Configuré" : "À configurer"}
+                    ton={r.configureLe ? "succes" : "attention"}
+                  />
                 </Cellule>
                 <Cellule>
                   <Statut valeur={r.venteActive ? "Activée" : "Désactivée"} ton={r.venteActive ? "succes" : "neutre"} />
@@ -236,6 +243,7 @@ function PageQualification() {
               </Ligne>
             ))}
           </Tableau>
+
         )}
       </Panneau>
     </div>

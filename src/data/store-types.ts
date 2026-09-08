@@ -50,7 +50,12 @@ export interface Actions {
   deplacerOpportunite: (id: string, etape: EtapePipeline, mode?: "IA" | "Manuel") => void;
   ajouterCampagne: (c: Partial<Campagne>) => Campagne;
   ajouterProduit: (p: Partial<Produit>) => Produit;
+  majProduit: (id: string, patch: Partial<Produit>) => void;
+  archiverProduit: (id: string, archive: boolean) => void;
   majRegle: (produitId: string, patch: Partial<RegleProduit>) => void;
+  enregistrerRegle: (regle: RegleProduit) => void;
+  majStatutDevis: (id: string, statut: Devis["statut"]) => void;
+
   creerDevis: (d: {
     clientId: string;
     type: "Vente" | "Location";

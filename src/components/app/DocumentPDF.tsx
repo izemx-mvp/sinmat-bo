@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from "react";
-import { Download, Printer } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Download, FileText, Maximize2, Printer } from "lucide-react";
+
 import { jsPDF } from "jspdf";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -216,6 +217,124 @@ function genererPdf(doc: DocumentPDF) {
   return pdf;
 }
 
+/** Génère le PDF réel et retourne une URL blob (régénérée à chaque changement du document). */
+export function useUrlPdf(doc: DocumentPDF) {
+  const cle = JSON.stringify(doc);
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    let actif = true;
+    let courante = "";
+    try {
+      courante = genererPdf(doc).output("bloburl") as unknown as string;
+      if (actif) setUrl(courante);
+    } catch {
+      toast.error("Génération du PDF impossible");
+    }
+    return () => {
+      actif = false;
+      if (courante) URL.revokeObjectURL(courante);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cle]);
+
+  return url;
+}
+
+export function telechargerDocument(doc: DocumentPDF) {
+  genererPdf(doc).save(`${doc.reference}.pdf`);
+}
+
+export function imprimerDocument(doc: DocumentPDF) {
+  const pdf = genererPdf(doc);
+  pdf.autoPrint();
+  window.open(pdf.output("bloburl") as unknown as string, "_blank");
+}
+
+/** Lecteur PDF intégré : affiche le fichier réellement généré. */
+export function LecteurPDF({
+  doc,
+  hauteur = 720,
+  titre,
+}: {
+  doc: DocumentPDF;
+  hauteur?: number;
+  titre?: string;
+}) {
+  const url = useUrlPdf(doc);
+  const [pleinEcran, setPleinEcran] = useState(false);
+
+  const barre = (
+    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-muted/60 px-4 py-2.5">
+      <span className="text-[13px] font-semibold text-foreground">
+        {titre ?? `${doc.type} ${doc.reference}`}
+      </span>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPleinEcran(true)}>
+          <Maximize2 className="size-4" /> Plein écran
+        </Button>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => imprimerDocument(doc)}>
+          <Printer className="size-4" /> Imprimer
+        </Button>
+        <Button
+          size="sm"
+          className="gap-1.5"
+          onClick={() => {
+            telechargerDocument(doc);
+            toast.success("PDF téléchargé", { description: `${doc.type} ${doc.reference}` });
+          }}
+        >
+          <Download className="size-4" /> Télécharger
+        </Button>
+      </div>
+    </div>
+  );
+
+  const cadre = (h: number | string) =>
+    url ? (
+      <object
+        data={`${url}#view=FitH`}
+        type="application/pdf"
+        title={`${doc.type} ${doc.reference}`}
+        className="w-full bg-[#525659]"
+        style={{ height: typeof h === "number" ? `${h}px` : h }}
+      >
+        <div className="max-h-full overflow-auto bg-[#525659] p-4">
+          <ApercuDocument doc={doc} />
+        </div>
+      </object>
+    ) : (
+
+      <div
+        className="flex items-center justify-center bg-surface-muted text-[13px] text-muted-foreground"
+        style={{ height: typeof h === "number" ? `${h}px` : h }}
+      >
+        Génération du document en cours…
+      </div>
+    );
+
+  return (
+    <>
+      <div className="panel overflow-hidden p-0">
+        {barre}
+        {cadre(hauteur)}
+      </div>
+
+      <Dialog open={pleinEcran} onOpenChange={setPleinEcran}>
+        <DialogContent className="h-[95vh] max-w-[1200px] gap-0 overflow-hidden p-0">
+          <DialogHeader className="border-b border-border px-4 py-3">
+            <DialogTitle className="text-[14px]">
+              {doc.type} {doc.reference}
+            </DialogTitle>
+          </DialogHeader>
+          {cadre("calc(95vh - 56px)")}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+/** Bouton + boîte de dialogue affichant le PDF réel. */
 export function VisionneuseDocument({
   doc,
   declencheur,
@@ -225,49 +344,28 @@ export function VisionneuseDocument({
 }) {
   const [ouvert, setOuvert] = useState(false);
 
-  const telecharger = () => {
-    genererPdf(doc).save(`${doc.reference}.pdf`);
-    toast.success("PDF téléchargé", { description: `${doc.type} ${doc.reference}` });
-  };
-
-  const imprimer = () => {
-    const pdf = genererPdf(doc);
-    pdf.autoPrint();
-    const url = pdf.output("bloburl");
-    window.open(url as unknown as string, "_blank");
-  };
-
   return (
     <Dialog open={ouvert} onOpenChange={setOuvert}>
       <DialogTrigger asChild>
         {declencheur ?? (
-          <Button variant="outline" size="sm">
-            Aperçu PDF
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <FileText className="size-3.5" /> Voir le PDF
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-h-[92vh] max-w-[900px] overflow-y-auto bg-surface-muted">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between gap-3">
-            <span>
-              {doc.type} {doc.reference}
-            </span>
-            <span className="flex gap-2 pr-6">
-              <Button size="sm" variant="outline" onClick={imprimer}>
-                <Printer className="size-4" /> Imprimer
-              </Button>
-              <Button size="sm" onClick={telecharger}>
-                <Download className="size-4" /> Télécharger le PDF
-              </Button>
-            </span>
+      <DialogContent className="h-[92vh] max-w-[1000px] gap-0 overflow-hidden p-0">
+        <DialogHeader className="border-b border-border px-4 py-3">
+          <DialogTitle className="text-[14px]">
+            {doc.type} {doc.reference}
           </DialogTitle>
         </DialogHeader>
-        <ApercuDocument doc={doc} />
+        <div className="h-[calc(92vh-56px)] overflow-auto p-4">
+          {ouvert && <LecteurPDF doc={doc} hauteur={720} />}
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-export function telechargerDocument(doc: DocumentPDF) {
-  genererPdf(doc).save(`${doc.reference}.pdf`);
-}
+export { ApercuDocument, genererPdf };
+

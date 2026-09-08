@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Package, Search } from "lucide-react";
+import { Package, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Cellule, Kpi, Ligne, Onglets, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
@@ -23,9 +23,15 @@ export const Route = createFileRoute("/catalogue/")({
 const TABS = ["Tous", "Terrassement", "Démolition", "Béton", "Énergie", "Compactage", "Accès", "Découpe"];
 
 function PageCatalogue() {
-  const { produits } = useSinmat();
+  const { produits: tous } = useSinmat();
   const [tab, setTab] = useState("Tous");
   const [q, setQ] = useState("");
+  const [voirArchives, setVoirArchives] = useState(false);
+
+  const produits = useMemo(
+    () => tous.filter((p) => (voirArchives ? p.archive : !p.archive)),
+    [tous, voirArchives],
+  );
 
   const filtres = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -40,12 +46,30 @@ function PageCatalogue() {
 
   return (
     <div className="space-y-5 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-[19px] font-bold text-foreground">Catalogue matériel</h1>
+          <p className="text-[13px] text-muted-foreground">Parc SINMAT disponible à la vente et à la location.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setVoirArchives((v) => !v)}>
+            {voirArchives ? "Voir les produits actifs" : "Voir les archives"}
+          </Button>
+          <Lien to="/catalogue/nouveau">
+            <Button size="sm" className="gap-1.5">
+              <Plus className="size-4" /> Ajouter un produit
+            </Button>
+          </Lien>
+        </div>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi libelle="Références" valeur={String(produits.length)} ton="info" icone={Package} />
         <Kpi libelle="Disponibles" valeur={String(produits.filter((p) => p.disponibilite === "Disponible").length)} ton="succes" />
         <Kpi libelle="Stock faible" valeur={String(produits.filter((p) => p.disponibilite === "Stock faible").length)} ton="attention" />
         <Kpi libelle="Indisponibles" valeur={String(produits.filter((p) => p.disponibilite === "Indisponible").length)} ton="danger" />
       </div>
+
 
       <Panneau bodyClassName="p-0">
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-3">
