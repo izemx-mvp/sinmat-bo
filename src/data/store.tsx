@@ -584,9 +584,3 @@ export function SinmatProvider({ children }: { children: ReactNode }) {
 
   return <Ctx.Provider value={valeur}>{children}</Ctx.Provider>;
 }
-
-export function useSinmat() {
-  const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useSinmat doit être utilisé dans SinmatProvider");
-  return ctx;
-}
