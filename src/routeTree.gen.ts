@@ -35,6 +35,7 @@ import { Route as PaiementsIndexRouteImport } from './routes/paiements.index'
 import { Route as PaiementsIdRouteImport } from './routes/paiements.$id'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
+import { Route as QualificationIndexRouteImport } from './routes/qualification.index'
 import { Route as RetoursIndexRouteImport } from './routes/retours.index'
 import { Route as RetoursIdRouteImport } from './routes/retours.$id'
 import { Route as VentesIndexRouteImport } from './routes/ventes.index'
@@ -170,6 +171,11 @@ const ProspectsIdRoute = ProspectsIdRouteImport.update({
   path: '/prospects/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QualificationIndexRoute = QualificationIndexRouteImport.update({
+  id: '/qualification/',
+  path: '/qualification/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RetoursIndexRoute = RetoursIndexRouteImport.update({
   id: '/retours/',
   path: '/retours/',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/opportunites/': typeof OpportunitesIndexRoute
   '/paiements/': typeof PaiementsIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
+  '/qualification/': typeof QualificationIndexRoute
   '/retours/': typeof RetoursIndexRoute
   '/ventes/': typeof VentesIndexRoute
 }
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/opportunites': typeof OpportunitesIndexRoute
   '/paiements': typeof PaiementsIndexRoute
   '/prospects': typeof ProspectsIndexRoute
+  '/qualification': typeof QualificationIndexRoute
   '/retours': typeof RetoursIndexRoute
   '/ventes': typeof VentesIndexRoute
 }
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/opportunites/': typeof OpportunitesIndexRoute
   '/paiements/': typeof PaiementsIndexRoute
   '/prospects/': typeof ProspectsIndexRoute
+  '/qualification/': typeof QualificationIndexRoute
   '/retours/': typeof RetoursIndexRoute
   '/ventes/': typeof VentesIndexRoute
 }
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/opportunites/'
     | '/paiements/'
     | '/prospects/'
+    | '/qualification/'
     | '/retours/'
     | '/ventes/'
   fileRoutesByTo: FileRoutesByTo
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/opportunites'
     | '/paiements'
     | '/prospects'
+    | '/qualification'
     | '/retours'
     | '/ventes'
   id:
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/opportunites/'
     | '/paiements/'
     | '/prospects/'
+    | '/qualification/'
     | '/retours/'
     | '/ventes/'
   fileRoutesById: FileRoutesById
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   OpportunitesIndexRoute: typeof OpportunitesIndexRoute
   PaiementsIndexRoute: typeof PaiementsIndexRoute
   ProspectsIndexRoute: typeof ProspectsIndexRoute
+  QualificationIndexRoute: typeof QualificationIndexRoute
   RetoursIndexRoute: typeof RetoursIndexRoute
   VentesIndexRoute: typeof VentesIndexRoute
 }
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProspectsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/qualification/': {
+      id: '/qualification/'
+      path: '/qualification'
+      fullPath: '/qualification/'
+      preLoaderRoute: typeof QualificationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/retours/': {
       id: '/retours/'
       path: '/retours'
@@ -664,6 +684,7 @@ const rootRouteChildren: RootRouteChildren = {
   OpportunitesIndexRoute: OpportunitesIndexRoute,
   PaiementsIndexRoute: PaiementsIndexRoute,
   ProspectsIndexRoute: ProspectsIndexRoute,
+  QualificationIndexRoute: QualificationIndexRoute,
   RetoursIndexRoute: RetoursIndexRoute,
   VentesIndexRoute: VentesIndexRoute,
 }
