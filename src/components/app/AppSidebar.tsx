@@ -6,10 +6,10 @@ import {
   Building2,
   Target,
   Package,
+  Sparkles,
   ShoppingCart,
   CalendarRange,
   FileText,
-  ClipboardList,
   Wallet,
   Receipt,
   Truck,
@@ -39,6 +39,7 @@ const GROUPES: { titre?: string; items: Item[] }[] = [
     items: [
       { to: "/prospects", label: "Prospects", icon: Users, compteur: 128 },
       { to: "/campagnes", label: "Campagnes WhatsApp", icon: Radio, compteur: 4 },
+      { to: "/qualification", label: "Qualification Agent IA", icon: Sparkles },
       { to: "/clients", label: "Clients", icon: Building2 },
       { to: "/opportunites", label: "Opportunités", icon: Target, compteur: 24 },
     ],
@@ -50,7 +51,6 @@ const GROUPES: { titre?: string; items: Item[] }[] = [
       { to: "/ventes", label: "Ventes", icon: ShoppingCart },
       { to: "/locations", label: "Locations", icon: CalendarRange, compteur: 36 },
       { to: "/devis", label: "Devis", icon: FileText, compteur: 12 },
-      { to: "/commandes", label: "Commandes", icon: ClipboardList, compteur: 8 },
     ],
   },
   {

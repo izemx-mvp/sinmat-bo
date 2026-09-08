@@ -42,7 +42,10 @@ const META: Record<string, { titre: string; sousTitre: string }> = {
     sousTitre: "Parc en location, retours et disponibilités.",
   },
   "/devis": { titre: "Devis", sousTitre: "Proposition commerciale, validité et acceptation." },
-  "/commandes": { titre: "Commandes", sousTitre: "De la confirmation à la clôture." },
+  "/qualification": {
+    titre: "Qualification Agent IA",
+    sousTitre: "Règles produit, tarification et simulation de qualification.",
+  },
   "/paiements": { titre: "Paiements", sousTitre: "Encaissements, échéances et retards." },
   "/factures": { titre: "Factures", sousTitre: "Facturation client et suivi des règlements." },
   "/livraisons": { titre: "Livraisons", sousTitre: "Préparation, planning et tournées." },
@@ -54,13 +57,14 @@ const META: Record<string, { titre: string; sousTitre: string }> = {
 
 const CREATIONS = [
   { label: "Nouveau prospect", to: "/prospects" },
+  { label: "Importer des prospects", to: "/prospects/import" },
   { label: "Nouveau client", to: "/clients" },
   { label: "Nouvelle opportunité", to: "/opportunites" },
   { label: "Nouveau devis", to: "/devis/nouveau" },
-  { label: "Nouvelle vente", to: "/ventes" },
-  { label: "Nouvelle location", to: "/locations" },
-  { label: "Nouvelle commande", to: "/commandes" },
-  { label: "Nouvelle livraison", to: "/livraisons" },
+  { label: "Nouvelle vente", to: "/ventes/nouvelle" },
+  { label: "Nouvelle location", to: "/locations/nouvelle" },
+  { label: "Nouveau matériel", to: "/catalogue/nouveau" },
+  { label: "Nouvelle livraison", to: "/livraisons/nouvelle" },
 ];
 
 export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void }) {
@@ -84,7 +88,7 @@ export function TopHeader({ onOuvrirRecherche }: { onOuvrirRecherche: () => void
       >
         <Search className="size-4 shrink-0" />
         <span className="truncate">
-          Rechercher un client, devis, facture, commande, matériel...
+          Rechercher un client, devis, facture, vente, location, matériel...
         </span>
         <kbd className="ml-auto rounded border border-border bg-surface px-1.5 py-0.5 text-[10.5px] font-semibold">
           ⌘K
