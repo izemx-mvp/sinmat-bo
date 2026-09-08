@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Cellule, EnTeteDetail, Ligne, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
-import { utilisateurs } from "@/data/sinmat";
+import { VILLES, utilisateurs, type Ville } from "@/data/sinmat";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/prospects/import")({
@@ -114,7 +114,9 @@ function PageImport() {
         contact: valeur(l, "contact"),
         telephone: valeur(l, "telephone"),
         email: valeur(l, "email"),
-        ville: valeur(l, "ville") || "Casablanca",
+        ville: (VILLES as readonly string[]).includes(valeur(l, "ville"))
+          ? (valeur(l, "ville") as Ville)
+          : ("Casablanca" as Ville),
         secteur: valeur(l, "secteur") || "BTP",
       })),
       { source, responsableId, statut },
