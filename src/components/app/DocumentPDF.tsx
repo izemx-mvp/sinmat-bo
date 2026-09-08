@@ -292,13 +292,19 @@ export function LecteurPDF({
 
   const cadre = (h: number | string) =>
     url ? (
-      <iframe
+      <object
+        data={`${url}#view=FitH`}
+        type="application/pdf"
         title={`${doc.type} ${doc.reference}`}
-        src={`${url}#view=FitH`}
         className="w-full bg-[#525659]"
         style={{ height: typeof h === "number" ? `${h}px` : h }}
-      />
+      >
+        <div className="max-h-full overflow-auto bg-[#525659] p-4">
+          <ApercuDocument doc={doc} />
+        </div>
+      </object>
     ) : (
+
       <div
         className="flex items-center justify-center bg-surface-muted text-[13px] text-muted-foreground"
         style={{ height: typeof h === "number" ? `${h}px` : h }}
