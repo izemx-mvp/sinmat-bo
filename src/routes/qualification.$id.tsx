@@ -51,11 +51,16 @@ function FicheRegle() {
   const produit = produits.find((p) => p.id === id);
 
   const [brouillon, setBrouillon] = useState<RegleProduit | null>(regleStock ?? null);
+  const refSource = useRef<RegleProduit | null>(regleStock ?? null);
 
+  /* Re-synchronise le brouillon quand la règle enregistrée change (chargement, autre produit). */
   useEffect(() => {
-    setBrouillon(regleStock ? { ...regleStock } : null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    if (regleStock && regleStock !== refSource.current) {
+      refSource.current = regleStock;
+      setBrouillon({ ...regleStock });
+    }
+  }, [regleStock, id]);
+
 
   const modifie = useMemo(
     () => Boolean(brouillon && regleStock && JSON.stringify(brouillon) !== JSON.stringify(regleStock)),
