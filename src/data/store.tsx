@@ -1,5 +1,7 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import * as seed from "./sinmat";
+import { Ctx } from "./store-context";
+import type { Actions, EtatSinmat } from "./store-types";
 import type {
   Campagne,
   Client,
@@ -24,6 +26,7 @@ import type {
 
 export type { EtatSinmat, Actions } from "./store-types";
 export { useSinmat } from "./store-context";
+
 
 
 const seq = (prefix: string, n: number) => `${prefix}-2026-${String(n).padStart(4, "0")}`;
