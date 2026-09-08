@@ -125,7 +125,7 @@ function PageDevis() {
                   </Cellule>
                   <Cellule className="text-muted-foreground">{formatDate(d.date)}</Cellule>
                   <Cellule className="text-muted-foreground">{formatDate(d.expiration)}</Cellule>
-                  <Cellule num>{d.commandeId ?? "—"}</Cellule>
+                  <Cellule num>{d.venteId ?? d.locationId ?? "—"}</Cellule>
                 </Ligne>
               );
             })}

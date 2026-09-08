@@ -26,7 +26,7 @@ export const Route = createFileRoute("/clients/$id")({
       {
         name: "description",
         content:
-          "Fiche client 360° SINMAT : opportunités, devis, commandes, factures, paiements, livraisons et locations.",
+          "Fiche client 360° SINMAT : opportunités, devis, ventes, locations, factures, paiements, livraisons et locations.",
       },
       { property: "og:title", content: `Client ${params.id} — Gestion SINMAT` },
       { property: "og:description", content: "Vue complète de la relation client SINMAT." },
@@ -39,7 +39,7 @@ const TABS = [
   "Aperçu",
   "Opportunités",
   "Devis",
-  "Commandes",
+  "Ventes & Locations",
   "Factures",
   "Paiements",
   "Livraisons",
@@ -62,7 +62,8 @@ function FicheClient() {
 
   const opps = s.opportunites.filter((o) => o.clientId === client.id);
   const devis = s.devis.filter((d) => d.clientId === client.id);
-  const commandes = s.commandes.filter((c) => c.clientId === client.id);
+  const ventesClient = s.ventes.filter((v) => v.clientId === client.id);
+  const locationsClient = s.locations.filter((l) => l.clientId === client.id);
   const factures = s.factures.filter((f) => f.clientId === client.id);
   const paiements = s.paiements.filter((p) => p.clientId === client.id);
   const livraisons = s.livraisons.filter((l) => l.clientId === client.id);
@@ -103,7 +104,7 @@ function FicheClient() {
           <>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <Kpi libelle="Chiffre d'affaires" valeur={formatDH(client.ca)} ton="succes" />
-              <Kpi libelle="Commandes" valeur={String(client.commandes)} ton="info" />
+              <Kpi libelle="Opérations" valeur={String(client.operations)} ton="info" />
               <Kpi
                 libelle="Encours client"
                 valeur={formatDH(client.encours)}
@@ -139,7 +140,8 @@ function FicheClient() {
                     elements={[
                       { label: "Opportunités", ref: `${opps.length}`, to: "/opportunites" },
                       { label: "Devis", ref: `${devis.length}`, to: "/devis" },
-                      { label: "Commandes", ref: `${commandes.length}`, to: "/commandes" },
+                      { label: "Ventes", ref: `${ventesClient.length}`, to: "/ventes" },
+                      { label: "Locations", ref: `${locationsClient.length}`, to: "/locations" },
                       { label: "Factures", ref: `${factures.length}`, to: "/factures" },
                       { label: "Livraisons", ref: `${livraisons.length}`, to: "/livraisons" },
                       { label: "Locations", ref: `${locations.length}`, to: "/locations" },
@@ -149,9 +151,13 @@ function FicheClient() {
                 <Panneau titre="Activité récente">
                   <Chronologie
                     evenements={[
-                      ...commandes.map((c) => ({
-                        date: formatDate(c.date),
-                        libelle: `Commande ${c.id} — ${formatDH(c.montant)}`,
+                      ...ventesClient.map((v) => ({
+                        date: formatDate(v.date),
+                        libelle: `Vente ${v.id} — ${formatDH(v.montant)}`,
+                      })),
+                      ...locationsClient.map((l) => ({
+                        date: formatDate(l.debut),
+                        libelle: `Location ${l.id} — ${formatDH(l.montant)}`,
                       })),
                       ...factures.map((f) => ({
                         date: formatDate(f.date),
@@ -197,16 +203,19 @@ function FicheClient() {
           </TableSimple>
         )}
 
-        {tab === "Commandes" && (
-          <TableSimple vide="Aucune commande" colonnes={["Référence", "Date", "Type", "Total", "Statut"]}>
-            {commandes.map((c) => (
-              <Ligne key={c.id} to={`/commandes/${c.id}`}>
-                <Cellule num>{c.id}</Cellule>
-                <Cellule>{formatDate(c.date)}</Cellule>
-                <Cellule>{c.type}</Cellule>
-                <Cellule num>{formatDH(c.montant)}</Cellule>
+        {tab === "Ventes & Locations" && (
+          <TableSimple vide="Aucune opération" colonnes={["Référence", "Date", "Type", "Total", "Statut"]}>
+            {[
+              ...ventesClient.map((v) => ({ id: v.id, date: v.date, type: "Vente" as const, montant: v.montant, statut: v.statut, to: `/ventes/${v.id}` })),
+              ...locationsClient.map((l) => ({ id: l.id, date: l.debut, type: "Location" as const, montant: l.montant, statut: l.statut, to: `/locations/${l.id}` })),
+            ].map((o) => (
+              <Ligne key={o.id} to={o.to}>
+                <Cellule num>{o.id}</Cellule>
+                <Cellule>{formatDate(o.date)}</Cellule>
+                <Cellule>{o.type}</Cellule>
+                <Cellule num>{formatDH(o.montant)}</Cellule>
                 <Cellule>
-                  <Statut valeur={c.statut} />
+                  <Statut valeur={o.statut} />
                 </Cellule>
               </Ligne>
             ))}

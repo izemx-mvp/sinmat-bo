@@ -12,7 +12,7 @@ export const Route = createFileRoute("/ventes/")({
   head: () => ({
     meta: [
       { title: "Ventes — Gestion SINMAT" },
-      { name: "description", content: "Suivi des ventes de matériel SINMAT : commandes, clients et statuts." },
+      { name: "description", content: "Suivi des ventes de matériel SINMAT : clients, paiements et statuts." },
       { property: "og:title", content: "Ventes — Gestion SINMAT" },
       { property: "og:description", content: "Historique des ventes de matériel." },
     ],
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/ventes/")({
 const TABS = ["Toutes", "Confirmées", "En préparation", "Payées", "Livrées"];
 
 function PageVentes() {
-  const { ventes, clients, commandes } = useSinmat();
+  const { ventes, clients } = useSinmat();
   const [tab, setTab] = useState("Toutes");
   const [q, setQ] = useState("");
 
@@ -77,10 +77,9 @@ function PageVentes() {
             <VideEtat titre="Aucune vente" description="Aucune vente ne correspond à votre recherche." />
           </div>
         ) : (
-          <Tableau colonnes={["Référence", "Client", "Commande", "Date", "Montant", "Statut"]}>
+          <Tableau colonnes={["Référence", "Client", "Devis", "Date", "Montant", "Statut"]}>
             {filtres.map((v) => {
               const client = clients.find((c) => c.id === v.clientId);
-              const commande = commandes.find((c) => c.id === v.commandeId);
               return (
                 <Ligne key={v.id} to={`/ventes/${v.id}`}>
                   <Cellule num className="font-semibold">{v.id}</Cellule>
@@ -88,7 +87,7 @@ function PageVentes() {
                     <span className="block truncate font-semibold text-foreground">{client?.nom ?? "—"}</span>
                     <span className="block text-[11.5px] text-muted-foreground">{client?.ville ?? "—"}</span>
                   </Cellule>
-                  <Cellule num>{v.commandeId}</Cellule>
+                  <Cellule num>{v.devisId ?? "—"}</Cellule>
                   <Cellule className="text-muted-foreground">{formatDate(v.date)}</Cellule>
                   <Cellule num className="font-semibold">{formatDH(v.montant)}</Cellule>
                   <Cellule>

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/ventes/$id")({
   head: ({ params }) => ({
     meta: [
       { title: `Vente ${params.id} — Gestion SINMAT` },
-      { name: "description", content: "Fiche vente SINMAT : commande liée, client et statut." },
+      { name: "description", content: "Fiche vente SINMAT : devis lié, client, facture et livraison." },
       { property: "og:title", content: `Vente ${params.id} — Gestion SINMAT` },
       { property: "og:description", content: "Détail d'une vente." },
     ],
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/ventes/$id")({
 
 function FicheVente() {
   const { id } = Route.useParams();
-  const { ventes, clients, commandes, factures, livraisons } = useSinmat();
+  const { ventes, clients, devis, factures, livraisons } = useSinmat();
 
   const vente = ventes.find((v) => v.id === id);
   if (!vente) {
@@ -31,9 +31,9 @@ function FicheVente() {
   }
 
   const client = clients.find((c) => c.id === vente.clientId);
-  const commande = commandes.find((c) => c.id === vente.commandeId);
-  const facture = factures.find((f) => f.id === commande?.factureId);
-  const livraison = livraisons.find((l) => l.id === commande?.livraisonId);
+  const devisLie = devis.find((d) => d.id === vente.devisId);
+  const facture = factures.find((f) => f.id === vente.factureId);
+  const livraison = livraisons.find((l) => l.id === vente.livraisonId);
 
   return (
     <div>
@@ -44,9 +44,9 @@ function FicheVente() {
         sousTitre={`${client?.nom ?? "—"} · ${formatDate(vente.date)}`}
         actions={
           <>
-            {commande && (
-              <Lien to={`/commandes/${commande.id}`}>
-                <Button variant="outline" size="sm">Voir la commande</Button>
+            {devisLie && (
+              <Lien to={`/devis/${devisLie.id}`}>
+                <Button variant="outline" size="sm">Voir le devis</Button>
               </Lien>
             )}
           </>
@@ -80,7 +80,7 @@ function FicheVente() {
             <Infos
               donnees={[
                 { label: "Client", valeur: client?.nom ?? "—" },
-                { label: "Commande", valeur: commande?.id ?? "—" },
+                { label: "Devis", valeur: devisLie?.id ?? "—" },
                 { label: "Date", valeur: formatDate(vente.date) },
                 { label: "Montant", valeur: formatDH(vente.montant) },
                 { label: "Statut", valeur: <Statut valeur={vente.statut} /> },
@@ -91,7 +91,7 @@ function FicheVente() {
           <Panneau titre="Documents liés">
             <DocumentsLies
               elements={[
-                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
+                ...(devisLie ? [{ label: "Devis", ref: devisLie.id, to: `/devis/${devisLie.id}` }] : []),
                 ...(facture ? [{ label: "Facture", ref: facture.id, to: `/factures/${facture.id}` }] : []),
                 ...(livraison ? [{ label: "Livraison", ref: livraison.id, to: `/livraisons/${livraison.id}` }] : []),
               ]}

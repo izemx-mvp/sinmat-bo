@@ -45,7 +45,6 @@ function FicheFacture() {
   }
 
   const client = s.clients.find((c) => c.id === facture.clientId);
-  const commande = s.commandes.find((c) => c.id === facture.commandeId);
   const paiements = s.paiements.filter((p) => p.factureId === facture.id);
   const reste = Math.max(0, facture.ttc - facture.paye);
 
@@ -177,8 +176,8 @@ function FicheFacture() {
           <Panneau titre="Documents liés">
             <DocumentsLies
               elements={[
-                ...(commande ? [{ label: "Commande", ref: commande.id, to: `/commandes/${commande.id}` }] : []),
-                ...(commande?.devisId ? [{ label: "Devis", ref: commande.devisId, to: `/devis/${commande.devisId}` }] : []),
+                { label: facture.origineType, ref: facture.origineId, to: facture.origineType === "Vente" ? `/ventes/${facture.origineId}` : `/locations/${facture.origineId}` },
+                ...(facture.devisId ? [{ label: "Devis", ref: facture.devisId, to: `/devis/${facture.devisId}` }] : []),
               ]}
             />
           </Panneau>

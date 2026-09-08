@@ -18,7 +18,7 @@ export function CommandPalette({
   onOpenChange: (v: boolean) => void;
 }) {
   const navigate = useAller();
-  const { clients, prospects, opportunites, devis, commandes, factures, locations, produits, livraisons } =
+  const { clients, prospects, opportunites, devis, factures, ventes, locations, produits, livraisons } =
     useSinmat();
 
   const aller = (to: string) => {
@@ -28,7 +28,7 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Rechercher un client, devis, facture, commande, matériel..." />
+      <CommandInput placeholder="Rechercher un client, devis, facture, vente, location, matériel..." />
       <CommandList className="max-h-[420px]">
         <CommandEmpty>Aucun résultat.</CommandEmpty>
         <CommandGroup heading="Actions rapides">
@@ -67,10 +67,10 @@ export function CommandPalette({
             </CommandItem>
           ))}
         </CommandGroup>
-        <CommandGroup heading="Commandes">
-          {commandes.map((c) => (
-            <CommandItem key={c.id} value={`${c.id} commande`} onSelect={() => aller(`/commandes/${c.id}`)}>
-              {c.id} <span className="ml-2 text-muted-foreground">Commande</span>
+        <CommandGroup heading="Ventes">
+          {ventes.map((v) => (
+            <CommandItem key={v.id} value={`${v.id} vente`} onSelect={() => aller(`/ventes/${v.id}`)}>
+              {v.id} <span className="ml-2 text-muted-foreground">Vente</span>
             </CommandItem>
           ))}
         </CommandGroup>

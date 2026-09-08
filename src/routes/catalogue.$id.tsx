@@ -20,7 +20,7 @@ export const Route = createFileRoute("/catalogue/$id")({
 
 function FicheProduit() {
   const { id } = Route.useParams();
-  const { produits, locations, ventes, commandes, clients } = useSinmat();
+  const { produits, locations, ventes, clients } = useSinmat();
 
   const produit = produits.find((p) => p.id === id);
   if (!produit) {
@@ -32,7 +32,7 @@ function FicheProduit() {
   }
 
   const locationsProduit = locations.filter((l) => l.produitId === produit.id);
-  const ventesProduit = ventes.filter((v) => commandes.find((c) => c.id === v.commandeId)?.lignes.some((l) => l.produitId === produit.id));
+  const ventesProduit = ventes.filter((v) => v.lignes.some((l) => l.produitId === produit.id));
 
   return (
     <div>
