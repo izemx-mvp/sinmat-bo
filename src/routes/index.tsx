@@ -33,6 +33,7 @@ import { useSinmat } from "@/data/store";
 import {
   ETAPES_PIPELINE,
   formatDH,
+  formatDate,
   formatNombre,
   prenomUtilisateur,
   seriePerformance,
