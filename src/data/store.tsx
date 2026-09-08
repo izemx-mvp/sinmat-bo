@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as seed from "./sinmat";
 import { Ctx } from "./store-context";
 import type { Actions, EtatSinmat } from "./store-types";
@@ -27,30 +27,58 @@ import type {
 export type { EtatSinmat, Actions } from "./store-types";
 export { useSinmat } from "./store-context";
 
-
+const CLE_STOCKAGE = "sinmat-etat-v1";
 
 const seq = (prefix: string, n: number) => `${prefix}-2026-${String(n).padStart(4, "0")}`;
 const AUJ = "2026-09-08";
 
+const etatInitial = (): EtatSinmat => ({
+  prospects: [...seed.prospects],
+  campagnes: [...seed.campagnes],
+  clients: [...seed.clients],
+  opportunites: [...seed.opportunites],
+  produits: [...seed.produits],
+  devis: [...seed.devis],
+  ventes: [...seed.ventes],
+  locations: [...seed.locations],
+  factures: [...seed.factures],
+  paiements: [...seed.paiements],
+  livraisons: [...seed.livraisons],
+  retours: [...seed.retours],
+  conversations: [...seed.conversations],
+  messages: [...seed.messages],
+  regles: [...seed.reglesProduits],
+  audit: [...seed.auditSeed],
+});
+
 export function SinmatProvider({ children }: { children: ReactNode }) {
-  const [etat, setEtat] = useState<EtatSinmat>(() => ({
-    prospects: [...seed.prospects],
-    campagnes: [...seed.campagnes],
-    clients: [...seed.clients],
-    opportunites: [...seed.opportunites],
-    produits: [...seed.produits],
-    devis: [...seed.devis],
-    ventes: [...seed.ventes],
-    locations: [...seed.locations],
-    factures: [...seed.factures],
-    paiements: [...seed.paiements],
-    livraisons: [...seed.livraisons],
-    retours: [...seed.retours],
-    conversations: [...seed.conversations],
-    messages: [...seed.messages],
-    regles: [...seed.reglesProduits],
-    audit: [...seed.auditSeed],
-  }));
+  const [etat, setEtat] = useState<EtatSinmat>(etatInitial);
+  const charge = useRef(false);
+
+  /* Chargement depuis le stockage local (persistance MVP, sans backend). */
+  useEffect(() => {
+    try {
+      const brut = window.localStorage.getItem(CLE_STOCKAGE);
+      if (brut) {
+        const sauvegarde = JSON.parse(brut) as Partial<EtatSinmat>;
+        setEtat((s) => ({ ...s, ...sauvegarde }));
+      }
+    } catch {
+      /* stockage indisponible : on garde les données de départ */
+    }
+    charge.current = true;
+  }, []);
+
+  /* Sauvegarde à chaque changement. */
+  useEffect(() => {
+    if (!charge.current) return;
+    try {
+      window.localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+    } catch {
+      /* quota dépassé : on ignore silencieusement */
+    }
+  }, [etat]);
+
 
   const valeur = useMemo<EtatSinmat & Actions>(() => {
     const montantLignes = (lignes: LigneDocument[]) =>
@@ -222,11 +250,14 @@ export function SinmatProvider({ children }: { children: ReactNode }) {
       },
 
       ajouterProduit: (p) => {
-        const id = `P${etat.produits.length + 1}`;
+        const rang = etat.produits.length + 1;
+        const id = p.id ?? `P${rang}-${Date.now().toString(36)}`;
+        const stock = p.stock ?? 0;
         const nouveau: Produit = {
+          ...p,
           id,
           nom: p.nom ?? "Nouveau matériel",
-          reference: p.reference ?? `SIN-NEW-${String(etat.produits.length + 1).padStart(3, "0")}`,
+          reference: p.reference ?? `SIN-NEW-${String(rang).padStart(3, "0")}`,
           categorie: p.categorie ?? "Divers",
           description: p.description ?? "",
           image: p.image ?? "",
@@ -234,21 +265,48 @@ export function SinmatProvider({ children }: { children: ReactNode }) {
           prixJour: p.prixJour ?? 0,
           prixSemaine: p.prixSemaine ?? 0,
           prixMois: p.prixMois ?? 0,
-          stock: p.stock ?? 0,
+          stock,
           reserve: p.reserve ?? 0,
           enLocation: p.enLocation ?? 0,
           maintenance: p.maintenance ?? 0,
           fournisseur: p.fournisseur ?? "—",
-          disponibilite: (p.stock ?? 0) > 2 ? "Disponible" : (p.stock ?? 0) > 0 ? "Stock faible" : "Indisponible",
+          disponibilite: stock > 2 ? "Disponible" : stock > 0 ? "Stock faible" : "Indisponible",
           specs: p.specs ?? [],
+          archive: false,
+          creeLe: AUJ,
+          modifieLe: AUJ,
+        };
+        const regle: RegleProduit = {
+          ...seed.regleDefaut(nouveau, AUJ),
+          venteActive: nouveau.venteActive ?? true,
+          locationActive: nouveau.locationActive ?? true,
+          actif: nouveau.qualificationIA ?? true,
         };
         setEtat((e) => ({
           ...e,
           produits: [nouveau, ...e.produits],
-          regles: [seed.regleVide(id), ...e.regles],
+          regles: [regle, ...e.regles.filter((r) => r.produitId !== id)],
         }));
         return nouveau;
       },
+
+      majProduit: (id, patch) =>
+        setEtat((e) => ({
+          ...e,
+          produits: e.produits.map((p) => {
+            if (p.id !== id) return p;
+            const suivant = { ...p, ...patch, modifieLe: AUJ };
+            suivant.disponibilite =
+              suivant.stock > 2 ? "Disponible" : suivant.stock > 0 ? "Stock faible" : "Indisponible";
+            return suivant;
+          }),
+        })),
+
+      archiverProduit: (id, archive) =>
+        setEtat((e) => ({
+          ...e,
+          produits: e.produits.map((p) => (p.id === id ? { ...p, archive, modifieLe: AUJ } : p)),
+        })),
 
       majRegle: (produitId, patch) =>
         setEtat((e) => ({
@@ -257,6 +315,42 @@ export function SinmatProvider({ children }: { children: ReactNode }) {
             r.produitId === produitId ? { ...r, ...patch, modifieLe: AUJ } : r,
           ),
         })),
+
+      enregistrerRegle: (regle) =>
+        setEtat((e) => {
+          const suivante: RegleProduit = { ...regle, modifieLe: AUJ, configureLe: AUJ };
+          const existe = e.regles.some((r) => r.produitId === regle.produitId);
+          return {
+            ...e,
+            regles: existe
+              ? e.regles.map((r) => (r.produitId === regle.produitId ? suivante : r))
+              : [suivante, ...e.regles],
+            audit: [
+              {
+                id: `A-${Date.now()}`,
+                cible: regle.produitId,
+                date: `${AUJ}T12:00:00`,
+                action: "Paramètres Agent IA enregistrés",
+                acteur: "FatimaEzzahra Seffari",
+                mode: "Manuel" as const,
+              },
+              ...e.audit,
+            ],
+          };
+        }),
+
+      majStatutDevis: (id, statut) =>
+        setEtat((e) => {
+          const d = e.devis.find((x) => x.id === id);
+          return {
+            ...e,
+            devis: e.devis.map((x) => (x.id === id ? { ...x, statut } : x)),
+            opportunites: e.opportunites.map((o) =>
+              d && o.id === d.opportuniteId && statut === "Envoyé" ? { ...o, etape: "Devis envoyé" } : o,
+            ),
+          };
+        }),
+
 
       creerDevis: (d) => {
         const nouveau: Devis = {

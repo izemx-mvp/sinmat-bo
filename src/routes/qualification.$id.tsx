@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,16 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Cellule, EnTeteDetail, Ligne, Onglets, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { useSinmat } from "@/data/store";
-import { calculerLocation, formatDH, libellePalier, palierVentePourQte, type NiveauCritere } from "@/data/sinmat";
+import {
+  calculerLocation,
+  formatDH,
+  libellePalier,
+  palierVentePourQte,
+  utilisateurs,
+  type NiveauCritere,
+  type RegleProduit,
+  type UniteTarif,
+} from "@/data/sinmat";
 
 export const Route = createFileRoute("/qualification/$id")({
   head: ({ params }) => ({
@@ -27,19 +37,43 @@ export const Route = createFileRoute("/qualification/$id")({
 
 const TABS = ["Général", "Tarification location", "Tarification vente", "Critères IA", "Testeur"];
 const NIVEAUX: NiveauCritere[] = ["Requis", "Optionnel", "Non demandé"];
+const UNITES: UniteTarif[] = ["Jour", "Semaine", "Mois"];
 
 function FicheRegle() {
   const { id } = Route.useParams();
-  const { regles, produits, majRegle } = useSinmat();
+  const { regles, produits, enregistrerRegle } = useSinmat();
   const [tab, setTab] = useState("Général");
   const [qte, setQte] = useState("1");
   const [duree, setDuree] = useState("10");
   const [type, setType] = useState<"Location" | "Vente">("Location");
 
-  const regle = regles.find((r) => r.produitId === id);
+  const regleStock = regles.find((r) => r.produitId === id);
   const produit = produits.find((p) => p.id === id);
 
-  if (!regle || !produit) {
+  const [brouillon, setBrouillon] = useState<RegleProduit | null>(regleStock ?? null);
+
+  useEffect(() => {
+    setBrouillon(regleStock ? { ...regleStock } : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const modifie = useMemo(
+    () => Boolean(brouillon && regleStock && JSON.stringify(brouillon) !== JSON.stringify(regleStock)),
+    [brouillon, regleStock],
+  );
+
+  /* Protection contre la perte des modifications non enregistrées. */
+  useEffect(() => {
+    if (!modifie) return;
+    const h = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", h);
+    return () => window.removeEventListener("beforeunload", h);
+  }, [modifie]);
+
+  if (!regleStock || !produit || !brouillon) {
     return (
       <div className="p-6">
         <VideEtat titre="Règle introuvable" description="Ce matériel n'a pas de règle configurée." />
@@ -47,8 +81,14 @@ function FicheRegle() {
     );
   }
 
-  const maj = (patch: Parameters<typeof majRegle>[1]) => majRegle(regle.produitId, patch);
+  const regle = brouillon;
+  const maj = (patch: Partial<RegleProduit>) => setBrouillon((b) => (b ? { ...b, ...patch } : b));
   const nombre = (v: string) => Math.max(0, Number(v) || 0);
+
+  const enregistrer = () => {
+    enregistrerRegle(regle);
+    toast.success("Paramètres enregistrés", { description: produit.nom });
+  };
 
   const jours = Math.max(1, Number(duree) || 1);
   const quantite = Math.max(1, Number(qte) || 1);
@@ -68,16 +108,41 @@ function FicheRegle() {
         badges={
           <>
             <Statut valeur={regle.actif ? "Active" : "Inactive"} ton={regle.actif ? "succes" : "neutre"} />
-            <Statut valeur={regle.validationManuelle ? "Validation manuelle" : "Automatique"} ton={regle.validationManuelle ? "attention" : "info"} />
+            <Statut
+              valeur={regleStock.configureLe ? "Configuré" : "À configurer"}
+              ton={regleStock.configureLe ? "succes" : "attention"}
+            />
+            {modifie && <Statut valeur="Modifications non enregistrées" ton="attention" />}
           </>
         }
-        sousTitre={`${produit.reference} · ${produit.categorie} · Modifiée le ${regle.modifieLe}`}
+        sousTitre={`${produit.reference} · ${produit.categorie} · Dernier enregistrement : ${
+          regleStock.configureLe ?? "jamais"
+        }`}
         actions={
-          <Button size="sm" onClick={() => toast.success("Règle enregistrée", { description: produit.nom })}>
-            Enregistrer la règle
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!modifie}
+              onClick={() => {
+                setBrouillon({ ...regleStock });
+                toast.info("Modifications annulées");
+              }}
+            >
+              Annuler
+            </Button>
+            <Button size="sm" disabled={!modifie} onClick={enregistrer}>
+              Enregistrer les paramètres
+            </Button>
+          </>
         }
       />
+
+      {modifie && (
+        <div className="mx-6 mt-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-2.5 text-[13px] text-foreground">
+          Vous avez des modifications non enregistrées. Cliquez sur « Enregistrer les paramètres » pour les appliquer.
+        </div>
+      )}
 
       <div className="space-y-5 p-6">
         <Onglets valeurs={TABS} actif={tab} onChange={setTab} />
@@ -160,30 +225,90 @@ function FicheRegle() {
         {tab === "Tarification location" && (
           <Panneau
             titre="Paliers de location"
-            description="Tarifs indicatifs modifiables — appliqués automatiquement selon la durée demandée."
+            description="Tarifs appliqués automatiquement selon la durée demandée."
             bodyClassName="p-0"
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() =>
+                  maj({
+                    paliersLocation: [
+                      ...regle.paliersLocation,
+                      {
+                        id: `${regle.produitId}-L${Date.now().toString(36)}`,
+                        minJours: 1,
+                        maxJours: null,
+                        prix: 0,
+                        unite: "Jour",
+                      },
+                    ],
+                  })
+                }
+              >
+                <Plus className="size-4" /> Ajouter un palier
+              </Button>
+            }
           >
-            <Tableau colonnes={["Palier", "Jours min.", "Jours max.", "Unité", "Prix unitaire"]}>
-              {regle.paliersLocation.map((t, i) => (
-                <Ligne key={t.id}>
-                  <Cellule className="font-semibold">{libellePalier(t)}</Cellule>
-                  <Cellule num>{t.minJours}</Cellule>
-                  <Cellule num>{t.maxJours ?? "∞"}</Cellule>
-                  <Cellule>{t.unite}</Cellule>
-                  <Cellule>
-                    <Input
-                      className="h-8 w-[130px] text-[13px]"
-                      value={String(t.prix)}
-                      onChange={(e) => {
-                        const paliers = regle.paliersLocation.map((x, j) =>
-                          j === i ? { ...x, prix: nombre(e.target.value) } : x,
-                        );
-                        maj({ paliersLocation: paliers });
-                      }}
-                    />
-                  </Cellule>
-                </Ligne>
-              ))}
+            <Tableau colonnes={["Palier", "Jours min.", "Jours max.", "Unité", "Prix unitaire", ""]}>
+              {regle.paliersLocation.map((t, i) => {
+                const set = (patch: Partial<typeof t>) =>
+                  maj({ paliersLocation: regle.paliersLocation.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+                return (
+                  <Ligne key={t.id}>
+                    <Cellule className="font-semibold">{libellePalier(t)}</Cellule>
+                    <Cellule>
+                      <Input
+                        className="h-8 w-[90px] text-[13px]"
+                        value={String(t.minJours)}
+                        onChange={(e) => set({ minJours: nombre(e.target.value) })}
+                      />
+                    </Cellule>
+                    <Cellule>
+                      <Input
+                        className="h-8 w-[90px] text-[13px]"
+                        placeholder="∞"
+                        value={t.maxJours === null ? "" : String(t.maxJours)}
+                        onChange={(e) => set({ maxJours: e.target.value === "" ? null : nombre(e.target.value) })}
+                      />
+                    </Cellule>
+                    <Cellule>
+                      <Select value={t.unite} onValueChange={(v) => set({ unite: v as UniteTarif })}>
+                        <SelectTrigger className="h-8 w-[120px] text-[12.5px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {UNITES.map((u) => (
+                            <SelectItem key={u} value={u}>
+                              {u}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Cellule>
+                    <Cellule>
+                      <Input
+                        className="h-8 w-[130px] text-[13px]"
+                        value={String(t.prix)}
+                        onChange={(e) => set({ prix: nombre(e.target.value) })}
+                      />
+                    </Cellule>
+                    <Cellule>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:text-destructive"
+                        onClick={() =>
+                          maj({ paliersLocation: regle.paliersLocation.filter((_, j) => j !== i) })
+                        }
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </Cellule>
+                  </Ligne>
+                );
+              })}
             </Tableau>
           </Panneau>
         )}
@@ -191,29 +316,68 @@ function FicheRegle() {
         {tab === "Tarification vente" && (
           <Panneau
             titre="Paliers de vente"
-            description="Tarifs indicatifs modifiables — appliqués selon la quantité demandée."
+            description="Tarifs appliqués selon la quantité demandée."
             bodyClassName="p-0"
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() =>
+                  maj({
+                    paliersVente: [
+                      ...regle.paliersVente,
+                      { id: `${regle.produitId}-V${Date.now().toString(36)}`, minQte: 1, maxQte: null, prix: 0 },
+                    ],
+                  })
+                }
+              >
+                <Plus className="size-4" /> Ajouter un palier
+              </Button>
+            }
           >
-            <Tableau colonnes={["Palier", "Qté min.", "Qté max.", "Prix unitaire"]}>
-              {regle.paliersVente.map((t, i) => (
-                <Ligne key={t.id}>
-                  <Cellule className="font-semibold">{`${t.minQte} à ${t.maxQte ?? "+"} unités`}</Cellule>
-                  <Cellule num>{t.minQte}</Cellule>
-                  <Cellule num>{t.maxQte ?? "∞"}</Cellule>
-                  <Cellule>
-                    <Input
-                      className="h-8 w-[130px] text-[13px]"
-                      value={String(t.prix)}
-                      onChange={(e) => {
-                        const paliers = regle.paliersVente.map((x, j) =>
-                          j === i ? { ...x, prix: nombre(e.target.value) } : x,
-                        );
-                        maj({ paliersVente: paliers });
-                      }}
-                    />
-                  </Cellule>
-                </Ligne>
-              ))}
+            <Tableau colonnes={["Palier", "Qté min.", "Qté max.", "Prix unitaire", ""]}>
+              {regle.paliersVente.map((t, i) => {
+                const set = (patch: Partial<typeof t>) =>
+                  maj({ paliersVente: regle.paliersVente.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+                return (
+                  <Ligne key={t.id}>
+                    <Cellule className="font-semibold">{`${t.minQte} à ${t.maxQte ?? "+"} unités`}</Cellule>
+                    <Cellule>
+                      <Input
+                        className="h-8 w-[90px] text-[13px]"
+                        value={String(t.minQte)}
+                        onChange={(e) => set({ minQte: nombre(e.target.value) })}
+                      />
+                    </Cellule>
+                    <Cellule>
+                      <Input
+                        className="h-8 w-[90px] text-[13px]"
+                        placeholder="∞"
+                        value={t.maxQte === null ? "" : String(t.maxQte)}
+                        onChange={(e) => set({ maxQte: e.target.value === "" ? null : nombre(e.target.value) })}
+                      />
+                    </Cellule>
+                    <Cellule>
+                      <Input
+                        className="h-8 w-[130px] text-[13px]"
+                        value={String(t.prix)}
+                        onChange={(e) => set({ prix: nombre(e.target.value) })}
+                      />
+                    </Cellule>
+                    <Cellule>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => maj({ paliersVente: regle.paliersVente.filter((_, j) => j !== i) })}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </Cellule>
+                  </Ligne>
+                );
+              })}
             </Tableau>
           </Panneau>
         )}
@@ -257,17 +421,35 @@ function FicheRegle() {
                   { label: "Créer l'opportunité", k: "creerOpportunite" as const },
                   { label: "Calculer le montant", k: "calculerMontant" as const },
                   { label: "Préparer le devis", k: "preparerDevis" as const },
+                  { label: "Affecter un commercial", k: "affecterCommercial" as const },
                 ].map((a) => (
                   <div key={a.k} className="flex items-center justify-between">
                     <Label className="text-[13px]">{a.label}</Label>
                     <Switch
-                      checked={regle.actionsAutomatiques[a.k]}
+                      checked={Boolean(regle.actionsAutomatiques[a.k])}
                       onCheckedChange={(v) =>
                         maj({ actionsAutomatiques: { ...regle.actionsAutomatiques, [a.k]: v } })
                       }
                     />
                   </div>
                 ))}
+                {regle.actionsAutomatiques.affecterCommercial && (
+                  <div>
+                    <Label className="text-[12px]">Commercial affecté</Label>
+                    <Select value={regle.commercialId ?? "U1"} onValueChange={(v) => maj({ commercialId: v })}>
+                      <SelectTrigger className="mt-1 h-9 text-[13px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {utilisateurs.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.nom}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             </Panneau>
           </div>
@@ -323,6 +505,11 @@ function FicheRegle() {
                     {formatDH(type === "Location" ? calculLoc.total : totalVente)}
                   </span>
                 </div>
+                {modifie && (
+                  <p className="mt-2 text-[12px] text-muted-foreground">
+                    Simulation basée sur vos modifications en cours (non encore enregistrées).
+                  </p>
+                )}
               </div>
             </div>
           </Panneau>

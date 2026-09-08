@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Cellule, DocumentsLies, EnTeteDetail, Infos, Ligne, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { Lien, useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
-import { VisionneuseDocument } from "@/components/app/DocumentPDF";
-import { formatDH, formatDate, nomUtilisateur, produits } from "@/data/sinmat";
+import { LecteurPDF, telechargerDocument, type DocumentPDF } from "@/components/app/DocumentPDF";
+import { formatDH, formatDate, nomUtilisateur } from "@/data/sinmat";
+
 
 export const Route = createFileRoute("/devis/$id")({
   head: ({ params }) => ({
@@ -39,6 +41,33 @@ function FicheDevis() {
   const totalHT = devis.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100), 0);
   const totalTVA = devis.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (l.tva / 100), 0);
 
+  const doc: DocumentPDF = {
+    type: "Devis",
+    reference: devis.id,
+    date: devis.date,
+    echeance: devis.expiration,
+    echeanceLabel: "Validité",
+    client: {
+      nom: client?.nom ?? "—",
+      contact: client?.contact,
+      adresse: client?.adresse,
+      ville: client?.ville,
+      ice: client?.ice,
+    },
+    lignes: devis.lignes.map((l) => ({
+      designation: l.designation,
+      reference: s.produits.find((p) => p.id === l.produitId)?.reference,
+      quantite: l.quantite,
+      duree: l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : undefined,
+      prixUnitaire: l.prixUnitaire,
+      total: Math.round(l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100)),
+    })),
+    totalHT: Math.round(totalHT),
+    totalTVA: Math.round(totalTVA),
+    totalTTC: devis.montant,
+    conditions: devis.conditions,
+  };
+
   const accepter = () => {
     const res = s.accepterDevis(devis.id);
     if (res) {
@@ -48,6 +77,7 @@ function FicheDevis() {
   };
 
   const refuser = () => {
+    s.majStatutDevis(devis.id, "Refusé");
     toast.info("Devis marqué refusé");
   };
 
@@ -60,35 +90,19 @@ function FicheDevis() {
         sousTitre={`${client?.nom ?? "—"} · ${devis.type} · Responsable : ${nomUtilisateur(devis.responsableId)}`}
         actions={
           <>
-            <VisionneuseDocument
-              doc={{
-                type: "Devis",
-                reference: devis.id,
-                date: devis.date,
-                echeance: devis.expiration,
-                echeanceLabel: "Validité",
-                client: {
-                  nom: client?.nom ?? "—",
-                  contact: client?.contact,
-                  adresse: client?.adresse,
-                  ville: client?.ville,
-                  ice: client?.ice,
-                },
-                lignes: devis.lignes.map((l) => ({
-                  designation: l.designation,
-                  reference: produits.find((p) => p.id === l.produitId)?.reference,
-                  quantite: l.quantite,
-                  duree: l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : undefined,
-                  prixUnitaire: l.prixUnitaire,
-                  total: Math.round(l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100)),
-                })),
-                totalHT: Math.round(totalHT),
-                totalTVA: Math.round(totalTVA),
-                totalTTC: devis.montant,
-                conditions: devis.conditions,
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => {
+                telechargerDocument(doc);
+                if (devis.statut === "Brouillon") s.majStatutDevis(devis.id, "Généré");
+                toast.success("PDF téléchargé", { description: `Devis ${devis.id}` });
               }}
-            />
-            {devis.statut === "Brouillon" && (
+            >
+              <Download className="size-3.5" /> Télécharger le PDF
+            </Button>
+            {(devis.statut === "Brouillon" || devis.statut === "Généré") && (
               <Button variant="outline" size="sm" onClick={() => { s.envoyerDevis(devis.id); toast.success("Devis envoyé au client"); }}>
                 Envoyer
               </Button>
@@ -119,10 +133,13 @@ function FicheDevis() {
 
       <div className="grid gap-5 p-6 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
+          <LecteurPDF doc={doc} hauteur={760} titre={`Devis ${devis.id} — document PDF`} />
+
           <Panneau titre="Lignes du devis" bodyClassName="p-0">
             <Tableau colonnes={["Produit", "Quantité", "Durée", "Prix unitaire", "Remise", "TVA", "Total TTC"]}>
               {devis.lignes.map((l) => {
-                const produit = produits.find((p) => p.id === l.produitId);
+                const produit = s.produits.find((p) => p.id === l.produitId);
+
                 const total = l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100);
                 return (
                   <Ligne key={`${l.produitId}-${l.duree}`}>

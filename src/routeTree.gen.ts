@@ -18,6 +18,7 @@ import { Route as CampagnesIdRouteImport } from './routes/campagnes.$id'
 import { Route as CampagnesNouvelleRouteImport } from './routes/campagnes.nouvelle'
 import { Route as CatalogueIndexRouteImport } from './routes/catalogue.index'
 import { Route as CatalogueIdRouteImport } from './routes/catalogue.$id'
+import { Route as CatalogueNouveauRouteImport } from './routes/catalogue.nouveau'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsIdRouteImport } from './routes/clients.$id'
 import { Route as DevisIndexRouteImport } from './routes/devis.index'
@@ -42,6 +43,7 @@ import { Route as RetoursIndexRouteImport } from './routes/retours.index'
 import { Route as RetoursIdRouteImport } from './routes/retours.$id'
 import { Route as VentesIndexRouteImport } from './routes/ventes.index'
 import { Route as VentesIdRouteImport } from './routes/ventes.$id'
+import { Route as CatalogueIdModifierRouteImport } from './routes/catalogue.$id.modifier'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -86,6 +88,11 @@ const CatalogueIndexRoute = CatalogueIndexRouteImport.update({
 const CatalogueIdRoute = CatalogueIdRouteImport.update({
   id: '/catalogue/$id',
   path: '/catalogue/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogueNouveauRoute = CatalogueNouveauRouteImport.update({
+  id: '/catalogue/nouveau',
+  path: '/catalogue/nouveau',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientsIndexRoute = ClientsIndexRouteImport.update({
@@ -208,6 +215,11 @@ const VentesIdRoute = VentesIdRouteImport.update({
   path: '/ventes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CatalogueIdModifierRoute = CatalogueIdModifierRouteImport.update({
+  id: '/modifier',
+  path: '/modifier',
+  getParentRoute: () => CatalogueIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -216,7 +228,8 @@ export interface FileRoutesByFullPath {
   '/utilisateurs': typeof UtilisateursRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
-  '/catalogue/$id': typeof CatalogueIdRoute
+  '/catalogue/$id': typeof CatalogueIdRouteWithChildren
+  '/catalogue/nouveau': typeof CatalogueNouveauRoute
   '/clients/$id': typeof ClientsIdRoute
   '/devis/$id': typeof DevisIdRoute
   '/devis/nouveau': typeof DevisNouveauRoute
@@ -243,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/qualification/': typeof QualificationIndexRoute
   '/retours/': typeof RetoursIndexRoute
   '/ventes/': typeof VentesIndexRoute
+  '/catalogue/$id/modifier': typeof CatalogueIdModifierRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -251,7 +265,8 @@ export interface FileRoutesByTo {
   '/utilisateurs': typeof UtilisateursRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
-  '/catalogue/$id': typeof CatalogueIdRoute
+  '/catalogue/$id': typeof CatalogueIdRouteWithChildren
+  '/catalogue/nouveau': typeof CatalogueNouveauRoute
   '/clients/$id': typeof ClientsIdRoute
   '/devis/$id': typeof DevisIdRoute
   '/devis/nouveau': typeof DevisNouveauRoute
@@ -278,6 +293,7 @@ export interface FileRoutesByTo {
   '/qualification': typeof QualificationIndexRoute
   '/retours': typeof RetoursIndexRoute
   '/ventes': typeof VentesIndexRoute
+  '/catalogue/$id/modifier': typeof CatalogueIdModifierRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -287,7 +303,8 @@ export interface FileRoutesById {
   '/utilisateurs': typeof UtilisateursRoute
   '/campagnes/$id': typeof CampagnesIdRoute
   '/campagnes/nouvelle': typeof CampagnesNouvelleRoute
-  '/catalogue/$id': typeof CatalogueIdRoute
+  '/catalogue/$id': typeof CatalogueIdRouteWithChildren
+  '/catalogue/nouveau': typeof CatalogueNouveauRoute
   '/clients/$id': typeof ClientsIdRoute
   '/devis/$id': typeof DevisIdRoute
   '/devis/nouveau': typeof DevisNouveauRoute
@@ -314,6 +331,7 @@ export interface FileRoutesById {
   '/qualification/': typeof QualificationIndexRoute
   '/retours/': typeof RetoursIndexRoute
   '/ventes/': typeof VentesIndexRoute
+  '/catalogue/$id/modifier': typeof CatalogueIdModifierRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -325,6 +343,7 @@ export interface FileRouteTypes {
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
     | '/catalogue/$id'
+    | '/catalogue/nouveau'
     | '/clients/$id'
     | '/devis/$id'
     | '/devis/nouveau'
@@ -351,6 +370,7 @@ export interface FileRouteTypes {
     | '/qualification/'
     | '/retours/'
     | '/ventes/'
+    | '/catalogue/$id/modifier'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -360,6 +380,7 @@ export interface FileRouteTypes {
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
     | '/catalogue/$id'
+    | '/catalogue/nouveau'
     | '/clients/$id'
     | '/devis/$id'
     | '/devis/nouveau'
@@ -386,6 +407,7 @@ export interface FileRouteTypes {
     | '/qualification'
     | '/retours'
     | '/ventes'
+    | '/catalogue/$id/modifier'
   id:
     | '__root__'
     | '/'
@@ -395,6 +417,7 @@ export interface FileRouteTypes {
     | '/campagnes/$id'
     | '/campagnes/nouvelle'
     | '/catalogue/$id'
+    | '/catalogue/nouveau'
     | '/clients/$id'
     | '/devis/$id'
     | '/devis/nouveau'
@@ -421,6 +444,7 @@ export interface FileRouteTypes {
     | '/qualification/'
     | '/retours/'
     | '/ventes/'
+    | '/catalogue/$id/modifier'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -430,7 +454,8 @@ export interface RootRouteChildren {
   UtilisateursRoute: typeof UtilisateursRoute
   CampagnesIdRoute: typeof CampagnesIdRoute
   CampagnesNouvelleRoute: typeof CampagnesNouvelleRoute
-  CatalogueIdRoute: typeof CatalogueIdRoute
+  CatalogueIdRoute: typeof CatalogueIdRouteWithChildren
+  CatalogueNouveauRoute: typeof CatalogueNouveauRoute
   ClientsIdRoute: typeof ClientsIdRoute
   DevisIdRoute: typeof DevisIdRoute
   DevisNouveauRoute: typeof DevisNouveauRoute
@@ -522,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/catalogue/$id'
       fullPath: '/catalogue/$id'
       preLoaderRoute: typeof CatalogueIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogue/nouveau': {
+      id: '/catalogue/nouveau'
+      path: '/catalogue/nouveau'
+      fullPath: '/catalogue/nouveau'
+      preLoaderRoute: typeof CatalogueNouveauRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clients/': {
@@ -692,8 +724,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VentesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalogue/$id/modifier': {
+      id: '/catalogue/$id/modifier'
+      path: '/modifier'
+      fullPath: '/catalogue/$id/modifier'
+      preLoaderRoute: typeof CatalogueIdModifierRouteImport
+      parentRoute: typeof CatalogueIdRoute
+    }
   }
 }
+
+interface CatalogueIdRouteChildren {
+  CatalogueIdModifierRoute: typeof CatalogueIdModifierRoute
+}
+
+const CatalogueIdRouteChildren: CatalogueIdRouteChildren = {
+  CatalogueIdModifierRoute: CatalogueIdModifierRoute,
+}
+
+const CatalogueIdRouteWithChildren = CatalogueIdRoute._addFileChildren(
+  CatalogueIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -702,7 +753,8 @@ const rootRouteChildren: RootRouteChildren = {
   UtilisateursRoute: UtilisateursRoute,
   CampagnesIdRoute: CampagnesIdRoute,
   CampagnesNouvelleRoute: CampagnesNouvelleRoute,
-  CatalogueIdRoute: CatalogueIdRoute,
+  CatalogueIdRoute: CatalogueIdRouteWithChildren,
+  CatalogueNouveauRoute: CatalogueNouveauRoute,
   ClientsIdRoute: ClientsIdRoute,
   DevisIdRoute: DevisIdRoute,
   DevisNouveauRoute: DevisNouveauRoute,

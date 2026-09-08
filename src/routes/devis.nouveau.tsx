@@ -16,7 +16,16 @@ import {
 import { EnTeteDetail, Panneau } from "@/components/app/ui-kit";
 import { useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
-import { produits, type LigneDocument, type TypeActivite } from "@/data/sinmat";
+import {
+  calculerLocation,
+  palierVentePourQte,
+  type LigneDocument,
+  type Produit,
+  type RegleProduit,
+  type TypeActivite,
+} from "@/data/sinmat";
+import { VisionneuseDocument, type DocumentPDF } from "@/components/app/DocumentPDF";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/devis/nouveau")({
@@ -32,18 +41,45 @@ export const Route = createFileRoute("/devis/nouveau")({
 });
 
 function NouveauDevis() {
-  const { clients, creerDevis } = useSinmat();
+  const { clients, creerDevis, produits: tous, regles } = useSinmat();
   const aller = useAller();
+
+  const produits = useMemo(() => tous.filter((p) => !p.archive), [tous]);
+  const premier = produits[0];
 
   const [clientId, setClientId] = useState(clients[0]?.id ?? "");
   const [type, setType] = useState<TypeActivite>("Vente");
   const [expiration, setExpiration] = useState("2026-09-21");
   const [conditions, setConditions] = useState("Paiement 30 % à la commande, solde à la livraison.");
-  const [lignes, setLignes] = useState<LigneDocument[]>([
-    { produitId: produits[0]!.id, designation: produits[0]!.nom, quantite: 1, prixUnitaire: produits[0]!.prixVente, remise: 0, tva: 20 },
-  ]);
+  const [lignes, setLignes] = useState<LigneDocument[]>(
+    premier
+      ? [{ produitId: premier.id, designation: premier.nom, quantite: 1, prixUnitaire: premier.prixVente, remise: 0, tva: 20 }]
+      : [],
+  );
 
   const client = clients.find((c) => c.id === clientId);
+  const regleDe = (produitId: string): RegleProduit | undefined => regles.find((r) => r.produitId === produitId);
+
+  /** Prix unitaire issu des règles Agent IA enregistrées (paliers vente / location). */
+  const prixUnitaire = (
+    p: Produit,
+    activite: TypeActivite,
+    quantite: number,
+    duree: number,
+    unite: "Jour" | "Semaine" | "Mois",
+  ) => {
+    const regle = regleDe(p.id);
+    if (activite === "Vente") {
+      const palier = regle ? palierVentePourQte(regle.paliersVente, Math.max(1, quantite)) : undefined;
+      return palier?.prix ?? p.prixVente;
+    }
+    const jours = Math.max(1, duree) * (unite === "Jour" ? 1 : unite === "Semaine" ? 7 : 30);
+    if (regle) {
+      const calcul = calculerLocation(regle.paliersLocation, jours, 1);
+      if (calcul.total > 0) return Math.round(calcul.total / Math.max(1, duree));
+    }
+    return unite === "Jour" ? p.prixJour : unite === "Semaine" ? p.prixSemaine : p.prixMois;
+  };
 
   const total = useMemo(
     () =>
@@ -55,16 +91,18 @@ function NouveauDevis() {
   );
 
   const ajouterLigne = () => {
-    const p = produits[0]!;
+    const p = premier;
+    if (!p) return;
     setLignes((prev) => [
       ...prev,
       {
         produitId: p.id,
         designation: p.nom,
         quantite: 1,
-        prixUnitaire: type === "Vente" ? p.prixVente : p.prixJour,
+        prixUnitaire: prixUnitaire(p, type, 1, 1, "Jour"),
         remise: 0,
-        tva: 20,
+        tva: p.tva ?? 20,
+        ...(type === "Location" ? { duree: 1, uniteDuree: "Jour" as const } : {}),
       },
     ]);
   };
@@ -74,11 +112,20 @@ function NouveauDevis() {
       prev.map((l, idx) => {
         if (idx !== i) return l;
         const next = { ...l, ...patch };
-        if (patch.produitId) {
-          const p = produits.find((x) => x.id === patch.produitId);
-          if (p) {
+        const p = produits.find((x) => x.id === next.produitId);
+        if (p) {
+          if (patch.produitId) {
             next.designation = p.nom;
-            next.prixUnitaire = type === "Vente" ? p.prixVente : p.prixJour;
+            next.tva = p.tva ?? 20;
+          }
+          if (patch.produitId || patch.quantite || patch.duree || patch.uniteDuree) {
+            next.prixUnitaire = prixUnitaire(
+              p,
+              type,
+              next.quantite,
+              next.duree ?? 1,
+              next.uniteDuree ?? "Jour",
+            );
           }
         }
         return next;
@@ -88,10 +135,42 @@ function NouveauDevis() {
 
   const supprimerLigne = (i: number) => setLignes((prev) => prev.filter((_, idx) => idx !== i));
 
+  const totalHT = lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100), 0);
+
+  const apercu: DocumentPDF = {
+    type: "Devis",
+    reference: "DEV-APERÇU",
+    date: "2026-09-08",
+    echeance: expiration,
+    echeanceLabel: "Validité",
+    client: {
+      nom: client?.nom ?? "—",
+      contact: client?.contact,
+      adresse: client?.adresse,
+      ville: client?.ville,
+      ice: client?.ice,
+    },
+    lignes: lignes.map((l) => ({
+      designation: l.designation,
+      reference: produits.find((p) => p.id === l.produitId)?.reference,
+      quantite: l.quantite,
+      duree: l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : undefined,
+      prixUnitaire: l.prixUnitaire,
+      total: Math.round(l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100)),
+    })),
+    totalHT: Math.round(totalHT),
+    totalTVA: Math.round(total - totalHT),
+    totalTTC: Math.round(total),
+    conditions,
+  };
+
   const enregistrer = () => {
-    if (!clientId || lignes.length === 0) return;
-    const d = creerDevis({ clientId, type, lignes, conditions, expiration, statut: "Brouillon" });
-    toast.success("Devis créé", { description: `${d.id} · ${formatDH(d.montant)}` });
+    if (!clientId || lignes.length === 0) {
+      toast.error("Devis incomplet", { description: "Sélectionnez un client et au moins un produit." });
+      return;
+    }
+    const d = creerDevis({ clientId, type, lignes, conditions, expiration, statut: "Généré" });
+    toast.success("Devis généré", { description: `${d.id} · ${formatDH(d.montant)}` });
     aller(`/devis/${d.id}`);
   };
 
@@ -102,11 +181,15 @@ function NouveauDevis() {
         titre="Nouveau devis"
         sousTitre="Construisez une proposition commerciale."
         actions={
-          <Button size="sm" onClick={enregistrer}>
-            Enregistrer le devis
-          </Button>
+          <>
+            <VisionneuseDocument doc={apercu} />
+            <Button size="sm" onClick={enregistrer}>
+              Générer le devis
+            </Button>
+          </>
         }
       />
+
 
       <div className="grid gap-5 p-6 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
