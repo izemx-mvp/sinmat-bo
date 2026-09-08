@@ -14,6 +14,7 @@ import {
 import { Cellule, DocumentsLies, EnTeteDetail, Infos, Ligne, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { Lien } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
+import { VisionneuseDocument } from "@/components/app/DocumentPDF";
 import { formatDH, formatDate } from "@/data/sinmat";
 
 export const Route = createFileRoute("/factures/$id")({
@@ -47,6 +48,28 @@ function FicheFacture() {
   const client = s.clients.find((c) => c.id === facture.clientId);
   const paiements = s.paiements.filter((p) => p.factureId === facture.id);
   const reste = Math.max(0, facture.ttc - facture.paye);
+  const origine =
+    facture.origineType === "Vente"
+      ? s.ventes.find((v) => v.id === facture.origineId)
+      : s.locations.find((l) => l.id === facture.origineId);
+  const lignesFacture =
+    origine && "lignes" in origine
+      ? origine.lignes.map((l) => ({
+          designation: l.designation,
+          reference: l.produitId,
+          quantite: l.quantite,
+          duree: l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : undefined,
+          prixUnitaire: l.prixUnitaire,
+          total: Math.round(l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100)),
+        }))
+      : [
+          {
+            designation: `${facture.origineType} ${facture.origineId}`,
+            quantite: 1,
+            prixUnitaire: facture.ht,
+            total: facture.ttc,
+          },
+        ];
 
   const enregistrer = () => {
     const m = Number(montant);
@@ -77,6 +100,26 @@ function FicheFacture() {
         sousTitre={`${client?.nom ?? "—"} · Échéance : ${formatDate(facture.echeance)}`}
         actions={
           <>
+            <VisionneuseDocument
+              doc={{
+                type: "Facture",
+                reference: facture.id,
+                date: facture.date,
+                echeance: facture.echeance,
+                client: {
+                  nom: client?.nom ?? "—",
+                  contact: client?.contact,
+                  adresse: client?.adresse,
+                  ville: client?.ville,
+                  ice: client?.ice,
+                },
+                lignes: lignesFacture,
+                totalHT: facture.ht,
+                totalTVA: facture.ttc - facture.ht,
+                totalTTC: facture.ttc,
+                conditions: `Origine : ${facture.origineType} ${facture.origineId}. Règlement à l'échéance indiquée.`,
+              }}
+            />
             {reste > 0 && (
               <Button size="sm" onClick={() => document.getElementById("paiement-form")?.scrollIntoView({ behavior: "smooth" })}>
                 Enregistrer un paiement

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Cellule, DocumentsLies, EnTeteDetail, Infos, Ligne, Panneau, Statut, Tableau, VideEtat } from "@/components/app/ui-kit";
 import { Lien, useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
+import { VisionneuseDocument } from "@/components/app/DocumentPDF";
 import { formatDH, formatDate, nomUtilisateur, produits } from "@/data/sinmat";
 
 export const Route = createFileRoute("/devis/$id")({
@@ -59,8 +60,36 @@ function FicheDevis() {
         sousTitre={`${client?.nom ?? "—"} · ${devis.type} · Responsable : ${nomUtilisateur(devis.responsableId)}`}
         actions={
           <>
+            <VisionneuseDocument
+              doc={{
+                type: "Devis",
+                reference: devis.id,
+                date: devis.date,
+                echeance: devis.expiration,
+                echeanceLabel: "Validité",
+                client: {
+                  nom: client?.nom ?? "—",
+                  contact: client?.contact,
+                  adresse: client?.adresse,
+                  ville: client?.ville,
+                  ice: client?.ice,
+                },
+                lignes: devis.lignes.map((l) => ({
+                  designation: l.designation,
+                  reference: produits.find((p) => p.id === l.produitId)?.reference,
+                  quantite: l.quantite,
+                  duree: l.duree ? `${l.duree} ${l.uniteDuree?.toLowerCase() ?? ""}` : undefined,
+                  prixUnitaire: l.prixUnitaire,
+                  total: Math.round(l.quantite * l.prixUnitaire * (l.duree ?? 1) * (1 - l.remise / 100) * (1 + l.tva / 100)),
+                })),
+                totalHT: Math.round(totalHT),
+                totalTVA: Math.round(totalTVA),
+                totalTTC: devis.montant,
+                conditions: devis.conditions,
+              }}
+            />
             {devis.statut === "Brouillon" && (
-              <Button variant="outline" size="sm" onClick={() => toast.success("Devis envoyé au client")}>
+              <Button variant="outline" size="sm" onClick={() => { s.envoyerDevis(devis.id); toast.success("Devis envoyé au client"); }}>
                 Envoyer
               </Button>
             )}
