@@ -35,6 +35,7 @@ import { Route as PaiementsIndexRouteImport } from './routes/paiements.index'
 import { Route as PaiementsIdRouteImport } from './routes/paiements.$id'
 import { Route as ProspectsIndexRouteImport } from './routes/prospects.index'
 import { Route as ProspectsIdRouteImport } from './routes/prospects.$id'
+import { Route as ProspectsImportRouteImport } from './routes/prospects.import'
 import { Route as QualificationIndexRouteImport } from './routes/qualification.index'
 import { Route as QualificationIdRouteImport } from './routes/qualification.$id'
 import { Route as RetoursIndexRouteImport } from './routes/retours.index'
@@ -172,6 +173,11 @@ const ProspectsIdRoute = ProspectsIdRouteImport.update({
   path: '/prospects/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProspectsImportRoute = ProspectsImportRouteImport.update({
+  id: '/prospects/import',
+  path: '/prospects/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QualificationIndexRoute = QualificationIndexRouteImport.update({
   id: '/qualification/',
   path: '/qualification/',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/opportunites/$id': typeof OpportunitesIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/prospects/import': typeof ProspectsImportRoute
   '/qualification/$id': typeof QualificationIdRoute
   '/retours/$id': typeof RetoursIdRoute
   '/ventes/$id': typeof VentesIdRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/opportunites/$id': typeof OpportunitesIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/prospects/import': typeof ProspectsImportRoute
   '/qualification/$id': typeof QualificationIdRoute
   '/retours/$id': typeof RetoursIdRoute
   '/ventes/$id': typeof VentesIdRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/opportunites/$id': typeof OpportunitesIdRoute
   '/paiements/$id': typeof PaiementsIdRoute
   '/prospects/$id': typeof ProspectsIdRoute
+  '/prospects/import': typeof ProspectsImportRoute
   '/qualification/$id': typeof QualificationIdRoute
   '/retours/$id': typeof RetoursIdRoute
   '/ventes/$id': typeof VentesIdRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/opportunites/$id'
     | '/paiements/$id'
     | '/prospects/$id'
+    | '/prospects/import'
     | '/qualification/$id'
     | '/retours/$id'
     | '/ventes/$id'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/opportunites/$id'
     | '/paiements/$id'
     | '/prospects/$id'
+    | '/prospects/import'
     | '/qualification/$id'
     | '/retours/$id'
     | '/ventes/$id'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/opportunites/$id'
     | '/paiements/$id'
     | '/prospects/$id'
+    | '/prospects/import'
     | '/qualification/$id'
     | '/retours/$id'
     | '/ventes/$id'
@@ -428,6 +440,7 @@ export interface RootRouteChildren {
   OpportunitesIdRoute: typeof OpportunitesIdRoute
   PaiementsIdRoute: typeof PaiementsIdRoute
   ProspectsIdRoute: typeof ProspectsIdRoute
+  ProspectsImportRoute: typeof ProspectsImportRoute
   QualificationIdRoute: typeof QualificationIdRoute
   RetoursIdRoute: typeof RetoursIdRoute
   VentesIdRoute: typeof VentesIdRoute
@@ -630,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProspectsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prospects/import': {
+      id: '/prospects/import'
+      path: '/prospects/import'
+      fullPath: '/prospects/import'
+      preLoaderRoute: typeof ProspectsImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/qualification/': {
       id: '/qualification/'
       path: '/qualification'
@@ -692,6 +712,7 @@ const rootRouteChildren: RootRouteChildren = {
   OpportunitesIdRoute: OpportunitesIdRoute,
   PaiementsIdRoute: PaiementsIdRoute,
   ProspectsIdRoute: ProspectsIdRoute,
+  ProspectsImportRoute: ProspectsImportRoute,
   QualificationIdRoute: QualificationIdRoute,
   RetoursIdRoute: RetoursIdRoute,
   VentesIdRoute: VentesIdRoute,
