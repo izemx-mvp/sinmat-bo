@@ -2,7 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
-  Radio,
   Building2,
   Target,
   Package,
@@ -38,7 +37,6 @@ const GROUPES: { titre?: string; items: Item[] }[] = [
     titre: "Commercial",
     items: [
       { to: "/prospects", label: "Prospects", icon: Users, compteur: 128 },
-      { to: "/campagnes", label: "Campagnes WhatsApp", icon: Radio, compteur: 4 },
       { to: "/qualification", label: "Qualification Agent IA", icon: Sparkles },
       { to: "/clients", label: "Clients", icon: Building2 },
       { to: "/opportunites", label: "Opportunités", icon: Target, compteur: 24 },
