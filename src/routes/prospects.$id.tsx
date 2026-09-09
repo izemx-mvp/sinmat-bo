@@ -291,3 +291,91 @@ function FicheProspect() {
     </div>
   );
 }
+
+function ConversationQualification({ prospectId }: { prospectId: string }) {
+  const conv = conversationDuProspect(prospectId) ?? conversations[0];
+  if (!conv) {
+    return (
+      <Panneau titre="Conversation client">
+        <VideEtat
+          titre="Aucune conversation"
+          description="Les échanges avec l'Agent IA apparaîtront ici."
+        />
+      </Panneau>
+    );
+  }
+  const msgs = messagesDe(conv.id);
+  const etapes = [
+    { titre: "Prise de contact", detail: `Message reçu via ${conv.canal} — langue : ${conv.langue}` },
+    { titre: "Collecte des besoins", detail: "L'Agent IA pose les questions de qualification (type, durée, ville, livraison)." },
+    { titre: "Extraction des informations", detail: conv.extraction.map((e) => `${e.label} : ${e.valeur}`).join(" · ") },
+    { titre: "Application des règles produit", detail: conv.regles.map((r) => `${r.label} : ${r.valeur}`).join(" · ") },
+    {
+      titre: conv.opportuniteId ? "Opportunité créée automatiquement" : "Qualification en cours",
+      detail: conv.opportuniteId
+        ? `Opportunité ${conv.opportuniteId} générée par l'Agent IA (confiance ${conv.confiance} %).`
+        : `Informations complémentaires attendues du client (confiance ${conv.confiance} %).`,
+    },
+  ];
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-3">
+      <Panneau
+        className="lg:col-span-2"
+        titre={`Exemple de conversation client — ${conv.canal}`}
+        description={`${conv.id} · Langue d'origine conservée (${conv.langue}) · Agent : ${conv.agent}`}
+      >
+        <div className="space-y-3">
+          {msgs.map((m) => {
+            const ia = m.emetteur === "IA";
+            return (
+              <div key={m.id} className={ia ? "flex justify-start" : "flex justify-end"}>
+                <div
+                  className={`max-w-[80%] rounded-xl border px-3.5 py-2.5 ${
+                    ia
+                      ? "border-primary/30 bg-primary/8"
+                      : "border-border bg-surface-muted"
+                  }`}
+                >
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {ia ? "✦ IA" : "Client"} · {m.horodatage.slice(11, 16)} · {m.langue}
+                  </p>
+                  <p className="text-[13.5px] leading-relaxed text-foreground">{m.contenu}</p>
+                  {m.traduction && (
+                    <p className="mt-1 text-[12px] italic text-muted-foreground">{m.traduction}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Panneau>
+
+      <div className="space-y-5">
+        <Panneau titre="Parcours de qualification — Agent IA">
+          <Chronologie
+            evenements={etapes.map((e) => ({ date: e.titre, libelle: e.detail }))}
+          />
+        </Panneau>
+
+        <AnalyseIA
+          lignes={[
+            { label: "Statut", valeur: conv.statut },
+            { label: "Niveau de confiance", valeur: `${conv.confiance} %` },
+            ...conv.extraction.slice(0, 4).map((e) => ({ label: e.label, valeur: e.valeur })),
+          ]}
+          recommandation={conv.resume}
+          action={
+            conv.opportuniteId ? (
+              <Lien to={`/opportunites/${conv.opportuniteId}`}>
+                <Button size="sm" variant="outline">
+                  Voir l'opportunité {conv.opportuniteId}
+                </Button>
+              </Lien>
+            ) : undefined
+          }
+        />
+      </div>
+    </div>
+  );
+}
