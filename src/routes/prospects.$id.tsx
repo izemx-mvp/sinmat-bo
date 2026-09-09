@@ -15,7 +15,13 @@ import {
 } from "@/components/app/ui-kit";
 import { Lien, useAller } from "@/components/app/nav";
 import { useSinmat } from "@/data/store";
-import { formatDate, nomUtilisateur } from "@/data/sinmat";
+import {
+  conversationDuProspect,
+  conversations,
+  formatDate,
+  messagesDe,
+  nomUtilisateur,
+} from "@/data/sinmat";
 
 export const Route = createFileRoute("/prospects/$id")({
   head: ({ params }) => ({
