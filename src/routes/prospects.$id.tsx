@@ -286,16 +286,7 @@ function FicheProspect() {
           </Panneau>
         )}
 
-        {tab === "Historique" && (
-          <Panneau titre="Historique complet">
-            <Chronologie
-              evenements={prospect.timeline.map((t) => ({
-                date: formatDate(t.date),
-                libelle: t.libelle,
-              }))}
-            />
-          </Panneau>
-        )}
+        {tab === "Historique" && <ConversationQualification prospectId={prospect.id} />}
       </div>
     </div>
   );
