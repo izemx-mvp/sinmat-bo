@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/sinmat-logo.png.asset.json";
+import logoSrc from "@/assets/sinmat-logo.png";
 
 export function SinmatLogo({
   compact = false,
@@ -13,7 +13,7 @@ export function SinmatLogo({
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <img
-        src={logoAsset.url}
+        src={logoSrc}
         alt="Logo SINMAT"
         className="size-9 shrink-0 object-contain"
       />
