@@ -5,9 +5,13 @@ import {
   Check,
   Eye,
   EyeOff,
+  Facebook,
+  Instagram,
   Loader2,
+  MessageCircle,
   Sparkles,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +19,6 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Panneau } from "@/components/app/ui-kit";
 import { cn } from "@/lib/utils";
-import whatsappLogo from "@/assets/integrations/whatsapp.svg.asset.json";
-import instagramLogo from "@/assets/integrations/instagram.svg.asset.json";
-import facebookLogo from "@/assets/integrations/facebook.svg.asset.json";
 import {
   DEFINITION,
   DEFINITIONS,
@@ -49,10 +50,10 @@ export const Route = createFileRoute("/integrations")({
   component: PageIntegrations,
 });
 
-const LOGOS: Record<Plateforme, { src: string; alt: string }> = {
-  WHATSAPP: { src: whatsappLogo.url, alt: "Logo WhatsApp" },
-  INSTAGRAM: { src: instagramLogo.url, alt: "Logo Instagram" },
-  FACEBOOK: { src: facebookLogo.url, alt: "Logo Facebook" },
+const ICONES: Record<Plateforme, LucideIcon> = {
+  WHATSAPP: MessageCircle,
+  INSTAGRAM: Instagram,
+  FACEBOOK: Facebook,
 };
 
 const TEINTE: Record<Plateforme, string> = {
@@ -185,7 +186,7 @@ function CarteIntegration({
   onDeconnecter: () => void;
 }) {
   const def = DEFINITION(integration.platform);
-  const logo = LOGOS[integration.platform];
+  const Icone = ICONES[integration.platform];
   const connecte = integration.status !== "DISCONNECTED";
 
   return (
@@ -197,7 +198,7 @@ function CarteIntegration({
             TEINTE[integration.platform],
           )}
         >
-          <img src={logo.src} alt={logo.alt} className="size-6 object-contain" />
+          <Icone className="size-5" strokeWidth={1.9} />
         </span>
         <Pastille statut={integration.status} />
       </div>
@@ -305,7 +306,7 @@ function ModaleConnexion({
   onDeconnecter: () => void;
 }) {
   const def = DEFINITION(integration.platform);
-  const logo = LOGOS[integration.platform];
+  const Icone = ICONES[integration.platform];
 
   const [valeurs, setValeurs] = useState<Record<string, string>>(() => {
     const base: Record<string, string> = {};
@@ -383,7 +384,7 @@ function ModaleConnexion({
                 TEINTE[integration.platform],
               )}
             >
-              <img src={logo.src} alt={logo.alt} className="size-6 object-contain" />
+              <Icone className="size-5" strokeWidth={1.9} />
             </span>
             <div>
               <h2 className="font-display text-[18px] font-bold text-foreground">
