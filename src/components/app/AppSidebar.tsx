@@ -14,6 +14,7 @@ import {
   Truck,
   Undo2,
   BarChart3,
+  Plug,
   UserCog,
   Settings,
   PanelLeftClose,
