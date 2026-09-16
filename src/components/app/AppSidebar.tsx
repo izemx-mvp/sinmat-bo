@@ -70,6 +70,7 @@ const GROUPES: { titre?: string; items: Item[] }[] = [
   {
     titre: "Système",
     items: [
+      { to: "/integrations", label: "Intégrations", icon: Plug },
       { to: "/utilisateurs", label: "Utilisateurs", icon: UserCog },
       { to: "/parametres", label: "Paramètres", icon: Settings },
     ],
