@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as RapportsRouteImport } from './routes/rapports'
 import { Route as UtilisateursRouteImport } from './routes/utilisateurs'
@@ -48,6 +49,11 @@ import { Route as CatalogueIdModifierRouteImport } from './routes/catalogue.$id.
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParametresRoute = ParametresRouteImport.update({
@@ -223,6 +229,7 @@ const CatalogueIdModifierRoute = CatalogueIdModifierRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/integrations': typeof IntegrationsRoute
   '/parametres': typeof ParametresRoute
   '/rapports': typeof RapportsRoute
   '/utilisateurs': typeof UtilisateursRoute
@@ -260,6 +267,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/integrations': typeof IntegrationsRoute
   '/parametres': typeof ParametresRoute
   '/rapports': typeof RapportsRoute
   '/utilisateurs': typeof UtilisateursRoute
@@ -298,6 +306,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/integrations': typeof IntegrationsRoute
   '/parametres': typeof ParametresRoute
   '/rapports': typeof RapportsRoute
   '/utilisateurs': typeof UtilisateursRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/integrations'
     | '/parametres'
     | '/rapports'
     | '/utilisateurs'
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/integrations'
     | '/parametres'
     | '/rapports'
     | '/utilisateurs'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/integrations'
     | '/parametres'
     | '/rapports'
     | '/utilisateurs'
@@ -449,6 +461,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  IntegrationsRoute: typeof IntegrationsRoute
   ParametresRoute: typeof ParametresRoute
   RapportsRoute: typeof RapportsRoute
   UtilisateursRoute: typeof UtilisateursRoute
@@ -491,6 +504,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parametres': {
@@ -748,6 +768,7 @@ const CatalogueIdRouteWithChildren = CatalogueIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  IntegrationsRoute: IntegrationsRoute,
   ParametresRoute: ParametresRoute,
   RapportsRoute: RapportsRoute,
   UtilisateursRoute: UtilisateursRoute,
