@@ -17,6 +17,7 @@ import {
   VideEtat,
 } from "@/components/app/ui-kit";
 import { Lien } from "@/components/app/nav";
+import { PanneauProduitAgent } from "@/components/app/agent/PanneauProduitAgent";
 import { useSinmat } from "@/data/store";
 import { formatDH, formatDate } from "@/data/sinmat";
 
@@ -213,32 +214,38 @@ function FicheProduit() {
           )}
 
           {tab === "Règles Agent IA" && (
-            <Panneau
-              titre="Paramètres de qualification"
-              action={
-                <Lien to={`/qualification/${produit.id}`}>
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <Sparkles className="size-3.5" /> Configurer
-                  </Button>
-                </Lien>
-              }
-            >
-              {!regle ? (
-                <VideEtat titre="Aucune règle" description="Ce produit n'a pas encore de règle Agent IA." />
-              ) : (
-                <Infos
-                  donnees={[
-                    { label: "Statut", valeur: regle.configureLe ? "Configuré" : "À configurer" },
-                    { label: "Agent actif", valeur: regle.actif ? "Oui" : "Non" },
-                    { label: "Vente", valeur: regle.venteActive ? "Activée" : "Désactivée" },
-                    { label: "Location", valeur: regle.locationActive ? "Activée" : "Désactivée" },
-                    { label: "Paliers location", valeur: String(regle.paliersLocation.length) },
-                    { label: "Paliers vente", valeur: String(regle.paliersVente.length) },
-                    { label: "Dernier enregistrement", valeur: regle.configureLe ? formatDate(regle.configureLe) : "—" },
-                  ]}
-                />
-              )}
-            </Panneau>
+            <>
+              <Panneau
+                titre="Paramètres de qualification"
+                action={
+                  <Lien to={`/qualification/${produit.id}`}>
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <Sparkles className="size-3.5" /> Configurer
+                    </Button>
+                  </Lien>
+                }
+              >
+                {!regle ? (
+                  <VideEtat titre="Aucune règle" description="Ce produit n'a pas encore de règle Agent IA." />
+                ) : (
+                  <Infos
+                    donnees={[
+                      { label: "Statut", valeur: regle.configureLe ? "Configuré" : "À configurer" },
+                      { label: "Agent actif", valeur: regle.actif ? "Oui" : "Non" },
+                      { label: "Vente", valeur: regle.venteActive ? "Activée" : "Désactivée" },
+                      { label: "Location", valeur: regle.locationActive ? "Activée" : "Désactivée" },
+                      { label: "Paliers location", valeur: String(regle.paliersLocation.length) },
+                      { label: "Paliers vente", valeur: String(regle.paliersVente.length) },
+                      {
+                        label: "Dernier enregistrement",
+                        valeur: regle.configureLe ? formatDate(regle.configureLe) : "—",
+                      },
+                    ]}
+                  />
+                )}
+              </Panneau>
+              <PanneauProduitAgent produitId={produit.id} produitNom={produit.nom} />
+            </>
           )}
 
           {tab === "Ventes" && (

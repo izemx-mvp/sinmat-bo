@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentIaRouteImport } from './routes/agent-ia'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as RapportsRouteImport } from './routes/rapports'
@@ -49,6 +50,11 @@ import { Route as CatalogueIdModifierRouteImport } from './routes/catalogue.$id.
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentIaRoute = AgentIaRouteImport.update({
+  id: '/agent-ia',
+  path: '/agent-ia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
@@ -229,6 +235,7 @@ const CatalogueIdModifierRoute = CatalogueIdModifierRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agent-ia': typeof AgentIaRoute
   '/integrations': typeof IntegrationsRoute
   '/parametres': typeof ParametresRoute
   '/rapports': typeof RapportsRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agent-ia': typeof AgentIaRoute
   '/integrations': typeof IntegrationsRoute
   '/parametres': typeof ParametresRoute
   '/rapports': typeof RapportsRoute
@@ -306,6 +314,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agent-ia': typeof AgentIaRoute
   '/integrations': typeof IntegrationsRoute
   '/parametres': typeof ParametresRoute
   '/rapports': typeof RapportsRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agent-ia'
     | '/integrations'
     | '/parametres'
     | '/rapports'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agent-ia'
     | '/integrations'
     | '/parametres'
     | '/rapports'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/agent-ia'
     | '/integrations'
     | '/parametres'
     | '/rapports'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentIaRoute: typeof AgentIaRoute
   IntegrationsRoute: typeof IntegrationsRoute
   ParametresRoute: typeof ParametresRoute
   RapportsRoute: typeof RapportsRoute
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent-ia': {
+      id: '/agent-ia'
+      path: '/agent-ia'
+      fullPath: '/agent-ia'
+      preLoaderRoute: typeof AgentIaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integrations': {
@@ -768,6 +788,7 @@ const CatalogueIdRouteWithChildren = CatalogueIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentIaRoute: AgentIaRoute,
   IntegrationsRoute: IntegrationsRoute,
   ParametresRoute: ParametresRoute,
   RapportsRoute: RapportsRoute,
