@@ -406,13 +406,7 @@ function ModaleConnexion({
               )}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Fermer"
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
+          <span className="w-6 shrink-0" />
         </header>
 
         <div className="space-y-5 px-6 py-5">
