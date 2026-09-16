@@ -441,7 +441,7 @@ function ModaleConnexion({
                 const masqueExistant = secretExistant(c);
                 return (
                   <div key={c.cle} className={cn(c.cle === "nom_connexion" && "sm:col-span-2")}>
-                    <Label className="mb-1.5 flex items-center gap-1 text-[12.5px]">
+                    <Label htmlFor={`champ-${c.cle}`} className="mb-1.5 flex items-center gap-1 text-[12.5px]">
                       {c.label}
                       {c.requis && <span className="text-primary">*</span>}
                     </Label>
@@ -463,6 +463,7 @@ function ModaleConnexion({
                     ) : (
                       <div className="relative">
                         <Input
+                          id={`champ-${c.cle}`}
                           type={c.secret && !visibles[c.cle] ? "password" : "text"}
                           value={valeurs[c.cle] ?? ""}
                           placeholder={c.placeholder}
