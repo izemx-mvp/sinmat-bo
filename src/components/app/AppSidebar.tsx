@@ -38,7 +38,6 @@ const GROUPES: { titre?: string; items: Item[] }[] = [
     titre: "Commercial",
     items: [
       { to: "/prospects", label: "Prospects", icon: Users, compteur: 128 },
-      { to: "/qualification", label: "Qualification Agent IA", icon: Sparkles },
       { to: "/clients", label: "Clients", icon: Building2 },
       { to: "/opportunites", label: "Opportunités", icon: Target, compteur: 24 },
     ],
@@ -70,6 +69,7 @@ const GROUPES: { titre?: string; items: Item[] }[] = [
   {
     titre: "Système",
     items: [
+      { to: "/agent-ia", label: "Agent IA", icon: Sparkles },
       { to: "/integrations", label: "Intégrations", icon: Plug },
       { to: "/utilisateurs", label: "Utilisateurs", icon: UserCog },
       { to: "/parametres", label: "Paramètres", icon: Settings },

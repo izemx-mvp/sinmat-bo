@@ -434,7 +434,7 @@ export function DocumentsLies({
   return (
     <ol className="space-y-1">
       {elements.map((el, i) => (
-        <li key={el.ref} className="relative">
+        <li key={`${el.label}-${el.to}-${i}`} className="relative">
           <Lien
             to={el.to}
             className="flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-2 transition-colors hover:border-border hover:bg-surface-muted"
