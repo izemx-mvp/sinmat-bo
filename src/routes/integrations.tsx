@@ -329,7 +329,7 @@ function ModaleConnexion({
     () =>
       def.champs
         .filter((c) => c.requis)
-        .every((c) => (secretExistant(c) ? true : valeurs[c.cle]?.trim().length > 0)),
+        .every((c) => (secretExistant(c) ? true : (valeurs[c.cle] ?? "").trim().length > 0)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [valeurs, remplaces, mode],
   );
@@ -360,14 +360,14 @@ function ModaleConnexion({
     const config: Record<string, string> = { ...integration.config };
     for (const c of def.champs) {
       if (secretExistant(c)) continue;
-      config[c.cle] = c.secret && valeurs[c.cle] ? MASQUE : valeurs[c.cle];
+      config[c.cle] = c.secret && valeurs[c.cle] ? MASQUE : (valeurs[c.cle] ?? "");
     }
     const maintenant = new Date().toISOString();
     onEnregistrer({
       status: "CONNECTED",
       display_name: valeurs["nom_connexion"] || def.display_name,
       account_name: valeurs[def.champCompte] || def.display_name,
-      account_identifier: valeurs[def.champIdentifiant] || "",
+      account_identifier: valeurs[def.champIdentifiant] ?? "",
       connected_at: integration.connected_at ?? maintenant,
       last_sync_at: maintenant,
       config,
@@ -376,10 +376,7 @@ function ModaleConnexion({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-[740px]"
-      >
+      <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-[740px]">
         <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-surface px-6 py-5">
           <div className="flex items-start gap-3">
             <span
